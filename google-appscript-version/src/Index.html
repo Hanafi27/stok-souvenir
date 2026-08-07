@@ -1,0 +1,68 @@
+﻿<!doctype html>
+<html lang="id">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IR Souvenir Stock</title>
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">IR</div>
+      <div>
+        <div class="fw-bold text-white">IR Souvenir Stock</div>
+        <small class="text-white-50">Google Apps Script</small>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button data-view="dashboard" class="active"><i class="bi bi-speedometer2"></i><span>Dashboard</span></button>
+      <button data-view="items"><i class="bi bi-box-seam"></i><span>Master Items</span></button>
+      <button data-view="incoming"><i class="bi bi-box-arrow-in-down"></i><span>Incoming</span></button>
+      <button data-view="outgoing"><i class="bi bi-box-arrow-up"></i><span>Outgoing</span></button>
+      <button data-view="history"><i class="bi bi-clock-history"></i><span>History</span></button>
+      <button data-view="reports"><i class="bi bi-file-earmark-spreadsheet"></i><span>Reports</span></button>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="btn btn-outline-secondary mobile-menu-btn" id="menuButton" type="button"><i class="bi bi-list"></i></button>
+      <div>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <p class="page-subtitle d-none d-md-block">Kelola stok souvenir dari Google Sheets.</p>
+      </div>
+      <div class="user-chip"><i class="bi bi-person-circle"></i><span id="userEmail">Loading...</span></div>
+    </header>
+
+    <section class="content-area">
+      <div id="alertBox" class="mb-3"></div>
+      <div id="viewRoot"></div>
+    </section>
+  </main>
+
+  <div class="modal fade" id="itemModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" id="itemForm">
+        <div class="modal-header"><h2 class="modal-title h5" id="itemModalTitle">Tambah Barang</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" name="id">
+          <div class="mb-3"><label class="form-label">Item Code</label><input class="form-control" name="itemCode" readonly placeholder="Otomatis saat disimpan"></div>
+          <div class="mb-3"><label class="form-label">Nama Barang</label><input class="form-control" name="itemName" required></div>
+          <div class="mb-3"><label class="form-label">Keterangan</label><textarea class="form-control" name="description" rows="3"></textarea></div>
+          <div class="row g-3">
+            <div class="col-sm-6"><label class="form-label">Stok Awal</label><input class="form-control" name="initialStock" type="number" min="0" required></div>
+            <div class="col-sm-6"><label class="form-label">Minimum Stock</label><input class="form-control" name="minimumStock" type="number" min="0" value="10" required></div>
+          </div>
+          <div class="form-check form-switch mt-3"><input class="form-check-input" type="checkbox" name="isActive" id="isActive" checked><label class="form-check-label" for="isActive">Aktif</label></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary btn-icon"><i class="bi bi-save"></i>Simpan</button></div>
+      </form>
+    </div>
+  </div>
+
+  <?!= include('Scripts'); ?>
+</body>
+</html>

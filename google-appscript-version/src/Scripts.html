@@ -1,0 +1,195 @@
+﻿<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+const state = { view: 'dashboard', items: [], transactions: [], dashboard: null, selectedItems: new Set(), charts: [] };
+const root = document.getElementById('viewRoot');
+const alertBox = document.getElementById('alertBox');
+const pageTitle = document.getElementById('pageTitle');
+const titles = { dashboard: 'Dashboard', items: 'Master Items', incoming: 'Incoming Transaction', outgoing: 'Outgoing Transaction', history: 'Transaction History', reports: 'Reports' };
+
+document.addEventListener('DOMContentLoaded', init);
+
+document.getElementById('menuButton').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.add('show');
+  document.getElementById('sidebarBackdrop').classList.add('show');
+});
+document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
+document.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.view)));
+document.getElementById('itemForm').addEventListener('submit', saveItem);
+
+function init() {
+  showLoading('Menyiapkan aplikasi...');
+  callServer('getInitialData')
+    .then((data) => {
+      document.getElementById('userEmail').textContent = data.user.email || 'Google Account';
+      state.dashboard = data.dashboard;
+      state.items = data.items;
+      render();
+    })
+    .catch(showError);
+}
+
+function setView(view) {
+  state.view = view;
+  document.querySelectorAll('[data-view]').forEach((button) => button.classList.toggle('active', button.dataset.view === view));
+  closeSidebar();
+  render();
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+
+function render() {
+  clearAlert();
+  destroyCharts();
+  pageTitle.textContent = titles[state.view];
+  if (state.view === 'dashboard') renderDashboard();
+  if (state.view === 'items') renderItems();
+  if (state.view === 'incoming') renderTransactionForm('IN');
+  if (state.view === 'outgoing') renderTransactionForm('OUT');
+  if (state.view === 'history') renderHistory();
+  if (state.view === 'reports') renderReports();
+}
+
+function renderDashboard() {
+  const data = state.dashboard;
+  root.innerHTML = `
+    <div class="row g-3 mb-3">
+      ${metric('bi-boxes', 'Total Items', data.totalItems)}
+      ${metric('bi-stack', 'Current Total Stock', data.currentStock)}
+      ${metric('bi-box-arrow-in-down', 'Incoming This Month', data.incomingMonth)}
+      ${metric('bi-box-arrow-up', 'Outgoing This Month', data.outgoingMonth)}
+      ${metric('bi-exclamation-triangle', 'Low Stock Items', data.lowStockItems.length)}
+    </div>
+    <div class="row g-3">
+      <div class="col-lg-8"><div class="panel"><h2 class="h6 mb-3">Monthly Transactions</h2><canvas id="monthlyChart" height="120"></canvas></div></div>
+      <div class="col-lg-4"><div class="panel"><h2 class="h6 mb-3">Top Used Items</h2><canvas id="topItemsChart" height="180"></canvas></div></div>
+      <div class="col-12"><div class="table-panel"><div class="p-3 border-bottom"><h2 class="h6 mb-0">Low Stock Items</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Kode</th><th>Barang</th><th>Stok</th><th>Minimum</th></tr></thead><tbody>${data.lowStockItems.length ? data.lowStockItems.map((item) => `<tr><td>${item.itemCode}</td><td>${escapeHtml(item.itemName)}</td><td><span class="badge badge-low">${fmt(item.currentStock)}</span></td><td>${fmt(item.minimumStock)}</td></tr>`).join('') : '<tr><td colspan="4" class="empty-state">Tidak ada item low stock.</td></tr>'}</tbody></table></div></div></div>
+    </div>`;
+  drawDashboardCharts(data.monthTransactions || []);
+}
+
+function renderItems() {
+  root.innerHTML = `
+    <div class="panel mb-3 no-print"><div class="toolbar justify-content-between"><div class="input-group search-field"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="itemSearch" class="form-control" placeholder="Cari kode, nama, atau keterangan"></div><div class="toolbar"><button class="btn btn-outline-danger btn-icon" id="bulkDeleteButton" disabled><i class="bi bi-trash3"></i>Hapus Terpilih <span class="badge text-bg-danger" id="selectedCount">0</span></button><button class="btn btn-primary btn-icon" id="addItemButton"><i class="bi bi-plus-lg"></i>Tambah Barang</button></div></div></div>
+    <div class="table-panel"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th class="selection-col"><input class="form-check-input" type="checkbox" id="selectAllItems"></th><th>Kode</th><th>Nama Barang</th><th>Keterangan</th><th>Stok Awal</th><th>Stok Saat Ini</th><th>Minimum</th><th>Dibuat</th><th class="text-end">Aksi</th></tr></thead><tbody id="itemRows"></tbody></table></div></div>`;
+  document.getElementById('addItemButton').addEventListener('click', openCreateItem);
+  document.getElementById('bulkDeleteButton').addEventListener('click', bulkDeleteItems);
+  document.getElementById('selectAllItems').addEventListener('change', toggleSelectAllItems);
+  document.getElementById('itemSearch').addEventListener('input', loadItems);
+  renderItemRows();
+}
+
+function renderItemRows() {
+  const tbody = document.getElementById('itemRows');
+  tbody.innerHTML = state.items.length ? state.items.map((item) => `<tr>
+    <td><input class="form-check-input item-checkbox" type="checkbox" value="${item.id}" ${state.selectedItems.has(item.id) ? 'checked' : ''}></td>
+    <td class="fw-semibold">${item.itemCode}</td><td>${escapeHtml(item.itemName)}</td><td>${escapeHtml(item.description || '-')}</td><td>${fmt(item.initialStock)}</td><td>${stockBadge(item)}</td><td>${fmt(item.minimumStock)}</td><td>${formatDate(item.createdAt)}</td>
+    <td class="text-end"><button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${item.id}"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}"><i class="bi bi-trash"></i></button></td>
+  </tr>`).join('') : '<tr><td colspan="9" class="empty-state">Belum ada data barang.</td></tr>';
+  tbody.querySelectorAll('.item-checkbox').forEach((checkbox) => checkbox.addEventListener('change', toggleItemSelection));
+  tbody.querySelectorAll('button').forEach((button) => button.addEventListener('click', handleItemAction));
+  updateBulkControls();
+}
+
+function renderTransactionForm(type) {
+  const isOut = type === 'OUT';
+  root.innerHTML = `<div class="row g-3"><div class="col-lg-7"><div class="panel"><form id="txForm"><div class="row g-3"><div class="col-sm-6"><label class="form-label">Date</label><input class="form-control" type="date" name="date" value="${today()}" required></div><div class="col-sm-6"><label class="form-label">Quantity</label><input class="form-control" type="number" min="1" name="quantity" required></div><div class="col-12"><label class="form-label">Item</label><select class="form-select" name="itemId" id="txItem" required><option value="">Pilih barang</option>${state.items.map((item) => `<option value="${item.id}">${item.itemCode} - ${escapeHtml(item.itemName)}</option>`).join('')}</select><div class="form-text" id="stockHint"></div></div><div class="col-12"><label class="form-label">PIC</label><input class="form-control" name="pic" required></div><div class="col-12"><label class="form-label">${isOut ? 'Purpose' : 'Description'}</label><textarea class="form-control" name="description" rows="3"></textarea></div><div class="col-12"><button class="btn ${isOut ? 'btn-warning' : 'btn-primary'} btn-icon" type="submit"><i class="bi ${isOut ? 'bi-box-arrow-up' : 'bi-box-arrow-in-down'}"></i>Simpan Transaksi</button></div></div></form></div></div><div class="col-lg-5"><div class="panel"><h2 class="h6 mb-3">Ringkasan</h2><div id="txSummary" class="text-muted">Pilih barang untuk melihat stok.</div></div></div></div>`;
+  document.getElementById('txForm').addEventListener('submit', (event) => saveTransaction(event, type));
+  document.getElementById('txItem').addEventListener('change', updateTxSummary);
+  document.querySelector('[name="quantity"]').addEventListener('input', updateTxSummary);
+}
+
+function renderHistory() {
+  root.innerHTML = `<div class="panel mb-3 no-print"><form id="historyFilter" class="row g-2 align-items-end"><div class="col-md-2"><label class="form-label">Date</label><input class="form-control" type="date" name="date"></div><div class="col-md-2"><label class="form-label">Month</label><input class="form-control" type="month" name="month"></div><div class="col-md-3"><label class="form-label">Item</label><select class="form-select" name="itemId"><option value="">Semua</option>${state.items.map((item) => `<option value="${item.id}">${item.itemCode} - ${escapeHtml(item.itemName)}</option>`).join('')}</select></div><div class="col-md-2"><label class="form-label">Type</label><select class="form-select" name="transactionType"><option value="">Semua</option><option value="IN">IN</option><option value="OUT">OUT</option></select></div><div class="col-md-3"><label class="form-label">Search</label><div class="input-group"><input class="form-control" name="search"><button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button></div></div></form></div><div class="table-panel"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Date</th><th>Item</th><th>Type</th><th>Quantity</th><th>PIC</th><th>Description</th></tr></thead><tbody id="historyRows"><tr><td colspan="6" class="empty-state">Loading...</td></tr></tbody></table></div></div>`;
+  document.getElementById('historyFilter').addEventListener('submit', (event) => { event.preventDefault(); loadTransactions(); });
+  document.getElementById('historyFilter').addEventListener('change', loadTransactions);
+  loadTransactions();
+}
+
+function renderReports() {
+  root.innerHTML = `<div class="panel mb-3 no-print"><form id="reportForm" class="row g-2 align-items-end"><div class="col-md-3"><label class="form-label">Period</label><select class="form-select" name="period" id="periodSelect"><option value="daily">Daily</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></div><div class="col-md-3"><label class="form-label">Value</label><input class="form-control" id="periodValue" name="value" type="date" value="${today()}" required></div><div class="col-md-6 d-flex gap-2 flex-wrap"><button class="btn btn-primary btn-icon" type="submit"><i class="bi bi-funnel"></i>Generate</button><button class="btn btn-outline-secondary btn-icon" type="button" id="printButton"><i class="bi bi-printer"></i>Print</button><button class="btn btn-outline-success btn-icon" type="button" id="csvButton"><i class="bi bi-filetype-csv"></i>CSV</button></div></form></div><div class="panel mb-3"><div class="row g-3" id="reportSummary"></div></div><div class="table-panel"><div class="p-3 border-bottom"><h2 class="h6 mb-0" id="reportTitle">Laporan Transaksi</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Date</th><th>Item Code</th><th>Item</th><th>Type</th><th>Quantity</th><th>PIC</th><th>Description</th></tr></thead><tbody id="reportRows"></tbody></table></div></div>`;
+  document.getElementById('periodSelect').addEventListener('change', changeReportInput);
+  document.getElementById('reportForm').addEventListener('submit', (event) => { event.preventDefault(); loadReport(); });
+  document.getElementById('printButton').addEventListener('click', () => window.print());
+  document.getElementById('csvButton').addEventListener('click', exportReportCsv);
+  loadReport();
+}
+
+function metric(icon, label, value) { return `<div class="col-sm-6 col-xl"><div class="metric-card"><div class="metric-icon"><i class="bi ${icon}"></i></div><div class="metric-value">${fmt(value)}</div><div class="metric-label">${label}</div></div></div>`; }
+function stockBadge(item) { return `<span class="badge ${Number(item.currentStock) <= Number(item.minimumStock) ? 'badge-low' : 'badge-soft'}">${fmt(item.currentStock)}</span>`; }
+
+function openCreateItem() {
+  const form = document.getElementById('itemForm');
+  form.reset(); form.id.value = ''; form.itemCode.value = ''; form.initialStock.disabled = false; form.isActive.checked = true;
+  document.getElementById('itemModalTitle').textContent = 'Tambah Barang';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('itemModal')).show();
+}
+
+function openEditItem(item) {
+  const form = document.getElementById('itemForm');
+  form.id.value = item.id; form.itemCode.value = item.itemCode; form.itemName.value = item.itemName; form.description.value = item.description || ''; form.initialStock.value = item.initialStock; form.initialStock.disabled = true; form.minimumStock.value = item.minimumStock; form.isActive.checked = item.isActive;
+  document.getElementById('itemModalTitle').textContent = 'Edit Barang';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('itemModal')).show();
+}
+
+function saveItem(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
+  payload.isActive = form.isActive.checked;
+  showLoading('Menyimpan barang...');
+  const fn = payload.id ? 'updateItem' : 'createItem';
+  const args = payload.id ? [payload.id, payload] : [payload];
+  callServer(fn, ...args).then(() => { bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide(); refreshAll('Barang berhasil disimpan.'); }).catch(showError);
+}
+
+function handleItemAction(event) {
+  const button = event.currentTarget;
+  const item = state.items.find((row) => row.id === button.dataset.id);
+  if (!item) return;
+  if (button.dataset.action === 'edit') openEditItem(item);
+  if (button.dataset.action === 'delete') deleteOneItem(item);
+}
+
+function deleteOneItem(item) {
+  if (!confirm(`Hapus ${item.itemName}?`)) return;
+  showLoading('Menghapus barang...');
+  callServer('deleteItem', item.id).then(() => { state.selectedItems.delete(item.id); refreshAll('Barang berhasil dihapus.'); }).catch(showError);
+}
+
+function toggleItemSelection(event) { event.target.checked ? state.selectedItems.add(event.target.value) : state.selectedItems.delete(event.target.value); updateBulkControls(); }
+function toggleSelectAllItems(event) { state.items.forEach((item) => event.target.checked ? state.selectedItems.add(item.id) : state.selectedItems.delete(item.id)); renderItemRows(); }
+function updateBulkControls() { const count = state.selectedItems.size; const btn = document.getElementById('bulkDeleteButton'); const badge = document.getElementById('selectedCount'); const all = document.getElementById('selectAllItems'); if (!btn || !badge || !all) return; btn.disabled = count === 0; badge.textContent = count; all.checked = state.items.length > 0 && state.items.every((item) => state.selectedItems.has(item.id)); all.indeterminate = state.items.some((item) => state.selectedItems.has(item.id)) && !all.checked; }
+function bulkDeleteItems() { const ids = [...state.selectedItems]; if (!ids.length || !confirm(`Hapus ${ids.length} barang terpilih?`)) return; showLoading('Menghapus barang terpilih...'); callServer('deleteItems', ids).then((result) => { state.selectedItems.clear(); const type = result.failed.length ? 'warning' : 'success'; refreshAll(`${result.deleted} barang berhasil dihapus. ${result.failed.length ? result.failed.length + ' barang gagal dihapus.' : ''}`, type); }).catch(showError); }
+
+function saveTransaction(event, type) { event.preventDefault(); const form = event.currentTarget; const payload = Object.fromEntries(new FormData(form).entries()); payload.transactionType = type; const item = state.items.find((row) => row.id === payload.itemId); if (type === 'OUT' && item && Number(payload.quantity) > Number(item.currentStock)) { showAlert('Stok tidak mencukupi.', 'danger'); return; } showLoading('Menyimpan transaksi...'); callServer('createTransaction', payload).then(() => { form.reset(); form.date.value = today(); refreshAll('Transaksi berhasil disimpan.'); }).catch(showError); }
+function updateTxSummary() { const itemId = document.getElementById('txItem').value; const qty = Number(document.querySelector('[name="quantity"]').value || 0); const item = state.items.find((row) => row.id === itemId); const out = state.view === 'outgoing'; if (!item) { document.getElementById('txSummary').textContent = 'Pilih barang untuk melihat stok.'; document.getElementById('stockHint').textContent = ''; return; } const next = out ? item.currentStock - qty : item.currentStock + qty; document.getElementById('stockHint').textContent = `Stok saat ini: ${fmt(item.currentStock)}`; document.getElementById('txSummary').innerHTML = `<dl class="row mb-0"><dt class="col-5">Kode</dt><dd class="col-7">${item.itemCode}</dd><dt class="col-5">Barang</dt><dd class="col-7">${escapeHtml(item.itemName)}</dd><dt class="col-5">Stok Saat Ini</dt><dd class="col-7">${fmt(item.currentStock)}</dd><dt class="col-5">Setelah Transaksi</dt><dd class="col-7"><span class="badge ${next < 0 ? 'badge-low' : 'badge-soft'}">${fmt(next)}</span></dd></dl>`; }
+
+function loadItems() { const q = document.getElementById('itemSearch').value; callServer('getItems', q).then((items) => { state.items = items; renderItemRows(); }).catch(showError); }
+function loadTransactions() { const filters = Object.fromEntries(new FormData(document.getElementById('historyFilter')).entries()); callServer('getTransactions', filters).then((rows) => { document.getElementById('historyRows').innerHTML = rows.length ? rows.map(historyRow).join('') : '<tr><td colspan="6" class="empty-state">Tidak ada transaksi.</td></tr>'; }).catch(showError); }
+function historyRow(row) { return `<tr><td>${formatDate(row.date)}</td><td><span class="fw-semibold">${row.itemCode}</span><br><span class="small text-muted">${escapeHtml(row.itemName)}</span></td><td><span class="badge ${row.type === 'IN' ? 'badge-in' : 'badge-out'}">${row.type}</span></td><td>${fmt(row.quantity)}</td><td>${escapeHtml(row.pic || '-')}</td><td>${escapeHtml(row.description || '-')}</td></tr>`; }
+
+let currentReportRows = [];
+function changeReportInput() { const period = document.getElementById('periodSelect').value; const input = document.getElementById('periodValue'); input.type = period === 'daily' ? 'date' : period === 'monthly' ? 'month' : 'number'; if (period === 'yearly') input.value = new Date().getFullYear(); }
+function loadReport() { const form = document.getElementById('reportForm'); const data = Object.fromEntries(new FormData(form).entries()); callServer('getReport', data.period, data.value).then((report) => { currentReportRows = report.rows; document.getElementById('reportSummary').innerHTML = metricText('Total Transaksi', report.totalTransactions) + metricText('Total Incoming', report.totalIncoming) + metricText('Total Outgoing', report.totalOutgoing); document.getElementById('reportTitle').textContent = `Laporan ${data.period} - ${data.value}`; document.getElementById('reportRows').innerHTML = report.rows.length ? report.rows.map((row) => `<tr><td>${formatDate(row.date)}</td><td>${row.itemCode}</td><td>${escapeHtml(row.itemName)}</td><td><span class="badge ${row.type === 'IN' ? 'badge-in' : 'badge-out'}">${row.type}</span></td><td>${fmt(row.quantity)}</td><td>${escapeHtml(row.pic || '-')}</td><td>${escapeHtml(row.description || '-')}</td></tr>`).join('') : '<tr><td colspan="7" class="empty-state">Tidak ada data laporan.</td></tr>'; }).catch(showError); }
+function metricText(label, value) { return `<div class="col-sm-4"><div class="metric-label">${label}</div><div class="metric-value h3 mb-0">${fmt(value)}</div></div>`; }
+function exportReportCsv() { const rows = [['Date','Item Code','Item','Type','Quantity','PIC','Description'], ...currentReportRows.map((r) => [r.date, r.itemCode, r.itemName, r.type, r.quantity, r.pic, r.description])]; downloadCsv('ir-souvenir-report.csv', rows); }
+
+function drawDashboardCharts(rows) { const daily = {}; rows.forEach((row) => { daily[row.date] ||= { in: 0, out: 0 }; row.type === 'IN' ? daily[row.date].in += row.quantity : daily[row.date].out += row.quantity; }); const labels = Object.keys(daily).sort(); state.charts.push(new Chart(document.getElementById('monthlyChart'), { type: 'bar', data: { labels, datasets: [{ label: 'Incoming', data: labels.map((d) => daily[d].in), backgroundColor: '#0f766e' }, { label: 'Outgoing', data: labels.map((d) => daily[d].out), backgroundColor: '#2563eb' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } })); const top = {}; rows.filter((r) => r.type === 'OUT').forEach((r) => top[r.itemName] = (top[r.itemName] || 0) + r.quantity); const entries = Object.entries(top).sort((a,b) => b[1] - a[1]).slice(0,10); state.charts.push(new Chart(document.getElementById('topItemsChart'), { type: 'doughnut', data: { labels: entries.map(([n]) => n), datasets: [{ data: entries.map(([,q]) => q), backgroundColor: ['#0f766e','#2563eb','#d97706','#7c3aed','#dc2626','#0891b2','#65a30d','#be123c','#4b5563','#ea580c'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } })); }
+function destroyCharts() { state.charts.forEach((chart) => chart.destroy()); state.charts = []; }
+function refreshAll(message, type = 'success') { callServer('getInitialData').then((data) => { state.dashboard = data.dashboard; state.items = data.items; render(); showAlert(message, type); }).catch(showError); }
+
+function callServer(fn, ...args) { return new Promise((resolve, reject) => google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](...args)); }
+function showLoading(message) { alertBox.innerHTML = `<div class="alert alert-info mb-0"><span class="spinner-border spinner-border-sm me-2"></span>${message}</div>`; }
+function showAlert(message, type = 'success') { alertBox.innerHTML = `<div class="alert alert-${type} mb-0">${message}</div>`; }
+function clearAlert() { alertBox.innerHTML = ''; }
+function showError(error) { showAlert(error.message || error, 'danger'); }
+function fmt(value) { return new Intl.NumberFormat('id-ID').format(Number(value || 0)); }
+function today() { return new Date().toISOString().slice(0, 10); }
+function formatDate(value) { return value ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(value)) : '-'; }
+function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch])); }
+function downloadCsv(filename, rows) { const csv = rows.map((row) => row.map((value) => { const text = String(value ?? ''); return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text; }).join(',')).join('\n'); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = filename; link.click(); URL.revokeObjectURL(url); }
+</script>

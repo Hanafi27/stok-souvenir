@@ -1,0 +1,15 @@
+﻿# Local/source data not needed for GitHub Pages
+Log Book Souvenir.xlsx
+-n
+
+# Sensitive/import source data
+/data/
+/google-appscript-version/data/
+/docs/sheet2-digitalization-analysis.md
+/supabase/seed_sheet2.sql
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
