@@ -17,7 +17,7 @@ if (user) {
     <article class="report-document" id="reportDocument">
       <header class="report-header">
         <div class="report-brand-block">
-          <div class="report-logo"><img src="./assets/app.png" alt="Logo APP"></div>
+          <div class="report-logo"><img src="./assets/mbos.png" alt="Logo MBOS"></div>
           <div class="report-title-block">
             <p class="report-company">APP</p>
             <h2 id="reportTitle">Laporan Stok Souvenir</h2>
@@ -148,3 +148,4 @@ function formatPeriod(period, value) {
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 }
+

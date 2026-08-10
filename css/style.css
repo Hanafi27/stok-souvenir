@@ -1786,3 +1786,80 @@ body.login-page .simple-login-card {
     min-height: 300px;
   }
 }
+
+/* MBOS red-white dashboard theme */
+.dashboard-hero {
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 55%, #ffffff 180%) !important;
+  border: 1px solid rgba(220, 38, 38, .28);
+  box-shadow: 0 16px 34px rgba(185, 28, 28, .14);
+}
+.dashboard-hero::after {
+  background: #ffffff !important;
+  opacity: .95;
+}
+.dashboard-eyebrow {
+  color: rgba(255, 255, 255, .82) !important;
+}
+.dashboard-hero-mark {
+  background: rgba(255, 255, 255, .9) !important;
+  border-color: rgba(255, 255, 255, .95) !important;
+  box-shadow: 0 12px 26px rgba(127, 29, 29, .22);
+}
+.dashboard-hero-mark img {
+  background: #ffffff !important;
+  box-shadow: none;
+}
+.dashboard-metrics .metric-card {
+  border-top: 0 !important;
+  border-color: #fee2e2 !important;
+  box-shadow: 0 12px 28px rgba(185, 28, 28, .07) !important;
+}
+.dashboard-metrics .metric-card::before {
+  background: #dc2626 !important;
+}
+.dashboard-metrics .metric-icon {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+.dashboard-metrics .metric-card-alert .metric-icon {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+.dashboard-grid .panel,
+.low-stock-panel {
+  border-color: #fee2e2 !important;
+  box-shadow: 0 12px 28px rgba(185, 28, 28, .06) !important;
+}
+.dashboard-grid .panel-heading h2,
+.low-stock-panel .panel-heading h2 {
+  color: #7f1d1d !important;
+}
+.dashboard-grid .panel-badge {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+}
+.dashboard-grid .btn-outline-success {
+  --bs-btn-color: #dc2626;
+  --bs-btn-border-color: #dc2626;
+  --bs-btn-hover-bg: #dc2626;
+  --bs-btn-hover-border-color: #dc2626;
+}
+.low-stock-panel {
+  border-top-color: #dc2626 !important;
+}
+.low-stock-code {
+  color: #7f1d1d !important;
+  background: #fff1f2 !important;
+}
+.low-stock-item {
+  border-color: #fee2e2 !important;
+}
+.low-stock-item.warning,
+.low-stock-item.critical {
+  background: linear-gradient(180deg, #ffffff, #fff7f7) !important;
+}
+.stock-meter span,
+.low-stock-item.warning .stock-meter span,
+.low-stock-item.critical .stock-meter span {
+  background: #dc2626 !important;
+}
