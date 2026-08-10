@@ -1,5 +1,5 @@
-﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-navbar-sidebar-20260810';
+import { requireAuth } from '../services/auth.js';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-all-controls-20260810';
 import { dashboardStats } from '../services/transactions.js';
 import { formatNumber } from '../utils/format.js';
 
@@ -13,7 +13,7 @@ if (user) {
         <h2>Monitoring stok souvenir</h2>
         <p class="mb-0">Pantau posisi stok, transaksi bulan berjalan, dan barang yang perlu segera ditindaklanjuti.</p>
       </div>
-      <div class="dashboard-hero-mark"><img src="assets/mbos.png?v=mbos-logo-final-20260810" alt="Logo MBOS"></div>
+      <div class="dashboard-hero-mark"><img src="assets/mbos.png?v=mbos-red-all-controls-20260810" alt="Logo MBOS"></div>
     </div>
     <div class="dashboard-metrics mb-3" id="metrics"></div>
     <div class="dashboard-grid">
@@ -44,7 +44,7 @@ if (user) {
           </div>
           <div class="toolbar">
             <span class="panel-badge" id="lowStockCount">0 barang</span>
-            <a class="btn btn-sm btn-outline-success btn-icon" href="items.html"><i class="bi bi-box-seam"></i>Kelola Barang</a>
+            <a class="btn btn-sm btn-outline-danger btn-icon" href="items.html"><i class="bi bi-box-seam"></i>Kelola Barang</a>
           </div>
         </div>
         <div id="lowStockRows" class="low-stock-list"></div>

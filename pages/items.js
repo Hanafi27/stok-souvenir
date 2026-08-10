@@ -1,5 +1,5 @@
-﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-navbar-sidebar-20260810';
+import { requireAuth } from '../services/auth.js';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-all-controls-20260810';
 import {
   listItems,
   getItem,
