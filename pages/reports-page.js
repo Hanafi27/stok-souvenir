@@ -7,7 +7,7 @@ let currentRows = [];
 let currentReport = { period: 'daily', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-excel-export-20260810';
+const REPORT_UI_VERSION = 'report-plain-excel-20260810';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -62,32 +62,26 @@ function resetFilters() {
 }
 
 function exportExcel() {
-  const periodLabel = periodLabels[currentReport.period] || 'Laporan';
-  const periodText = formatPeriod(currentReport.period, currentReport.value);
   const filename = `laporan-stok-souvenir-${currentReport.period}-${currentReport.value || new Date().toISOString().slice(0, 10)}.xls`;
-  const rows = currentRows.map(excelRow).join('') || '<tr><td colspan="7">Tidak ada data laporan.</td></tr>';
-  const html = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-    <head><meta charset="UTF-8"><style>
-      body { font-family: Arial, sans-serif; }
-      h1 { color: #006837; margin-bottom: 4px; }
-      .meta { color: #4b5563; margin-bottom: 16px; }
-      table { border-collapse: collapse; width: 100%; }
-      th { background: #006837; color: #ffffff; font-weight: bold; }
-      th, td { border: 1px solid #cfd8d3; padding: 8px; vertical-align: top; }
-      .in { color: #006837; font-weight: bold; }
-      .out { color: #ED1C24; font-weight: bold; }
-      .number { text-align: right; }
-    </style></head>
-    <body>
-      <h1>Laporan Stok Souvenir - ${escapeHtml(periodLabel)}</h1>
-      <div class="meta">Periode: ${escapeHtml(periodText)}</div>
-      <table>
-        <thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th>Jumlah</th><th>PIC</th><th>Keterangan</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </body></html>`;
-  const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const headers = ['Tanggal', 'Kode Barang', 'Barang', 'Jenis', 'Jumlah', 'PIC', 'Keterangan'];
+  const rows = currentRows.map((row) => [
+    formatDate(row.transaction_date),
+    row.items?.item_code || '-',
+    row.items?.item_name || '-',
+    row.transaction_type === 'IN' ? 'Masuk' : 'Keluar',
+    Number(row.quantity || 0),
+    row.pic || '-',
+    row.description || '-',
+  ]);
+  const metaRows = [
+    ['Laporan Stok Souvenir'],
+    [`Periode: ${formatPeriod(currentReport.period, currentReport.value)}`],
+    [],
+  ];
+  const worksheet = [...metaRows, headers, ...rows]
+    .map((row) => row.map(excelCell).join('\t'))
+    .join('\r\n');
+  const blob = new Blob(['\ufeff', worksheet], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -96,6 +90,13 @@ function exportExcel() {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+function excelCell(value) {
+  const text = String(value ?? '');
+  return text.includes('\t') || text.includes('\n') || text.includes('\r') || text.includes('"')
+    ? `"${text.replace(/"/g, '""')}"`
+    : text;
 }
 
 function excelRow(row) {
@@ -148,4 +149,5 @@ function formatPeriod(period, value) {
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 }
+
 
