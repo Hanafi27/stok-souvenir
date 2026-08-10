@@ -1863,3 +1863,21 @@ body.login-page .simple-login-card {
 .low-stock-item.critical .stock-meter span {
   background: #dc2626 !important;
 }
+
+/* MBOS sidebar red theme */
+.sidebar {
+  background: linear-gradient(180deg, #7f1d1d 0%, #b91c1c 52%, #dc2626 100%) !important;
+  border-right-color: rgba(255, 255, 255, .18) !important;
+}
+.sidebar-nav a.active,
+.sidebar-nav a:hover {
+  background: rgba(255, 255, 255, .16) !important;
+  color: #ffffff !important;
+  box-shadow: inset 4px 0 0 #ffffff !important;
+}
+.sidebar-nav a {
+  color: rgba(255, 255, 255, .84) !important;
+}
+.sidebar-brand .brand-image-mark {
+  background: #ffffff !important;
+}
