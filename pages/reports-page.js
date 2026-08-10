@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-all-controls-20260810';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-layout-syntax-fix-20260810';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
