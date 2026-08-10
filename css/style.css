@@ -4,8 +4,8 @@
   --app-border: #dbe5dc;
   --app-text: #1f2937;
   --app-muted: #6b7280;
-  --app-primary: #006837;
-  --app-primary-dark: #004c29;
+  --app-primary: #dc2626;
+  --app-primary-dark: #7f1d1d;
   --app-accent: #ED1C24;
   --app-accent-dark: #b91218;
   --app-white: #FFFFFF;
@@ -122,7 +122,7 @@ a:hover { color: var(--app-primary-dark); }
 .form-control, .form-select, .btn { border-radius: 8px; }
 .form-control:focus, .form-select:focus {
   border-color: var(--app-primary);
-  box-shadow: 0 0 0 .2rem rgba(0, 104, 55, .14);
+  box-shadow: 0 0 0 .2rem rgba(220, 38, 38, .14);
 }
 .btn-icon { display: inline-flex; align-items: center; gap: 8px; }
 .btn-primary {
@@ -155,7 +155,7 @@ a:hover { color: var(--app-primary-dark); }
 }
 .badge-soft { background: #edf2f0; color: #334155; }
 .badge-low { background: #ffe4e6; color: #b91218; }
-.badge-in { background: #dcfce7; color: #006837; }
+.badge-in { background: #dcfce7; color: #dc2626; }
 .badge-out { background: #ffe4e6; color: #b91218; }
 .empty-state { padding: 36px 16px; text-align: center; color: var(--app-muted); }
 
@@ -282,7 +282,7 @@ a:hover { color: var(--app-primary-dark); }
   min-height: 132px;
   padding: 16px;
   border-top: 0;
-  box-shadow: 0 10px 26px rgba(0, 76, 41, .06);
+  box-shadow: 0 10px 26px rgba(185, 28, 28, .06);
 }
 
 .metric-top {
@@ -313,7 +313,7 @@ a:hover { color: var(--app-primary-dark); }
 
 .chart-panel,
 .low-stock-panel {
-  box-shadow: 0 10px 26px rgba(0, 76, 41, .05);
+  box-shadow: 0 10px 26px rgba(185, 28, 28, .05);
 }
 
 .chart-panel-main,
@@ -461,7 +461,7 @@ a:hover { color: var(--app-primary-dark); }
   border: 1px solid var(--app-border);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 10px 26px rgba(0, 76, 41, .05);
+  box-shadow: 0 10px 26px rgba(185, 28, 28, .05);
 }
 
 .report-header {
@@ -649,13 +649,13 @@ a:hover { color: var(--app-primary-dark); }
   .report-logo {
     width: 48px;
     height: 48px;
-    border: 1px solid #006837;
-    color: #006837 !important;
+    border: 1px solid #dc2626;
+    color: #dc2626 !important;
     box-shadow: inset 0 -4px 0 #ED1C24;
   }
 
   .report-company {
-    color: #006837 !important;
+    color: #dc2626 !important;
     font-size: 10px;
   }
 
@@ -689,7 +689,7 @@ a:hover { color: var(--app-primary-dark); }
   }
 
   .report-metric strong {
-    color: #006837 !important;
+    color: #dc2626 !important;
     font-size: 18px;
   }
 
@@ -737,7 +737,7 @@ a:hover { color: var(--app-primary-dark); }
 
   .report-table thead th {
     background: #eef6f0 !important;
-    color: #004c29 !important;
+    color: #7f1d1d !important;
     font-weight: 700;
   }
 
@@ -766,7 +766,7 @@ a:hover { color: var(--app-primary-dark); }
   border-top: 4px solid var(--app-accent);
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 16px 36px rgba(0, 76, 41, .08);
+  box-shadow: 0 16px 36px rgba(185, 28, 28, .08);
 }
 
 .simple-login-brand {
@@ -814,7 +814,7 @@ a:hover { color: var(--app-primary-dark); }
   border: 1px solid #dbe5dc;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 14px 34px rgba(0, 76, 41, .08);
+  box-shadow: 0 14px 34px rgba(185, 28, 28, .08);
 }
 
 .login-page {
@@ -915,7 +915,7 @@ a:hover { color: var(--app-primary-dark); }
   border-left: 4px solid #f59e0b;
   border-radius: 8px;
   background: linear-gradient(180deg, #fff, #fbfdfb);
-  box-shadow: 0 6px 18px rgba(0, 76, 41, .04);
+  box-shadow: 0 6px 18px rgba(185, 28, 28, .04);
 }
 
 .low-stock-item.critical {
@@ -1199,7 +1199,7 @@ body.login-page .simple-login-card {
   }
 
   .report-company {
-    color: #006837 !important;
+    color: #dc2626 !important;
     font-size: 15px !important;
     font-weight: 800 !important;
     letter-spacing: .08em !important;
@@ -1222,7 +1222,7 @@ body.login-page .simple-login-card {
   }
 
   .report-table .badge-in {
-    background: #006837 !important;
+    background: #dc2626 !important;
   }
 
   .report-table .badge-out {
@@ -1395,7 +1395,7 @@ body.login-page .simple-login-card {
   border: 1px solid var(--app-border);
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 10px 26px rgba(0, 76, 41, .05);
+  box-shadow: 0 10px 26px rgba(185, 28, 28, .05);
 }
 .history-summary-card .summary-icon {
   width: 42px;
@@ -1403,7 +1403,7 @@ body.login-page .simple-login-card {
   display: grid;
   place-items: center;
   border-radius: 8px;
-  background: rgba(0, 104, 55, .1);
+  background: rgba(220, 38, 38, .10);
   color: var(--app-primary);
   font-size: 1.15rem;
 }
@@ -1465,7 +1465,7 @@ body.login-page .simple-login-card {
   font-weight: 800;
 }
 .transaction-pill.in {
-  background: rgba(0, 104, 55, .1);
+  background: rgba(220, 38, 38, .10);
   color: var(--app-primary);
 }
 .transaction-pill.out {
@@ -1881,3 +1881,70 @@ body.login-page .simple-login-card {
 .sidebar-brand .brand-image-mark {
   background: #ffffff !important;
 }
+
+
+/* Global MBOS red-white visual theme */
+:root {
+  --app-primary: #dc2626 !important;
+  --app-primary-dark: #7f1d1d !important;
+  --app-accent: #ef4444 !important;
+  --app-accent-dark: #991b1b !important;
+}
+body {
+  background: #fff7f7 !important;
+}
+a,
+a:hover,
+.page-title,
+.panel-heading h2,
+.table thead th {
+  color: #7f1d1d !important;
+}
+.sidebar {
+  background: #b91c1c !important;
+  background-image: linear-gradient(180deg, #7f1d1d 0%, #b91c1c 48%, #dc2626 100%) !important;
+}
+.btn-primary,
+.btn-success {
+  --bs-btn-bg: #dc2626 !important;
+  --bs-btn-border-color: #dc2626 !important;
+  --bs-btn-hover-bg: #b91c1c !important;
+  --bs-btn-hover-border-color: #b91c1c !important;
+  --bs-btn-active-bg: #991b1b !important;
+  --bs-btn-active-border-color: #991b1b !important;
+}
+.btn-outline-success,
+.btn-outline-primary {
+  --bs-btn-color: #dc2626 !important;
+  --bs-btn-border-color: #dc2626 !important;
+  --bs-btn-hover-bg: #dc2626 !important;
+  --bs-btn-hover-border-color: #dc2626 !important;
+  --bs-btn-hover-color: #ffffff !important;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 .2rem rgba(220, 38, 38, .14) !important;
+}
+.badge-in,
+.badge-soft,
+.transaction-pill.in,
+.history-summary-card.in .summary-icon {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+.alert-success {
+  background: #fff1f2 !important;
+  border-color: #fecaca !important;
+  color: #991b1b !important;
+}
+.report-header,
+.dashboard-hero {
+  background: linear-gradient(135deg, #991b1b, #dc2626) !important;
+}
+.report-logo,
+.brand-mark,
+.dashboard-hero-mark img {
+  background: #ffffff !important;
+}
+

@@ -1,5 +1,5 @@
 ﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=mbos-logo-final-20260810';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-white-final-20260810';
 import { dashboardStats } from '../services/transactions.js';
 import { formatNumber } from '../utils/format.js';
 
@@ -130,7 +130,7 @@ function renderMonthlyChart(rows) {
     data: {
       labels,
       datasets: [
-        { label: 'Barang Masuk', data: labels.map((d) => days[d].in), backgroundColor: 'rgba(0, 104, 55, .88)', borderColor: '#006837', borderWidth: 1, borderRadius: 6, maxBarThickness: 42, categoryPercentage: .56, barPercentage: .72 },
+        { label: 'Barang Masuk', data: labels.map((d) => days[d].in), backgroundColor: 'rgba(220, 38, 38, .88)', borderColor: '#dc2626', borderWidth: 1, borderRadius: 6, maxBarThickness: 42, categoryPercentage: .56, barPercentage: .72 },
         { label: 'Barang Keluar', data: labels.map((d) => days[d].out), backgroundColor: 'rgba(237, 28, 36, .82)', borderColor: '#ED1C24', borderWidth: 1, borderRadius: 6, maxBarThickness: 42, categoryPercentage: .56, barPercentage: .72 },
       ],
     },
@@ -158,10 +158,13 @@ function renderTopItemsChart(rows) {
   const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 10);
   new Chart(document.getElementById('topItemsChart'), {
     type: 'doughnut',
-    data: { labels: entries.map(([name]) => name), datasets: [{ data: entries.map(([, qty]) => qty), backgroundColor: ['#006837', '#ED1C24', '#8bbf9f', '#f47b80', '#004c29', '#b91218', '#6b8f71', '#d94b51', '#4b5563', '#a7c957'], borderWidth: 0 }] },
+    data: { labels: entries.map(([name]) => name), datasets: [{ data: entries.map(([, qty]) => qty), backgroundColor: ['#dc2626', '#ED1C24', '#fecaca', '#f47b80', '#7f1d1d', '#b91218', '#fca5a5', '#d94b51', '#4b5563', '#fee2e2'], borderWidth: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, boxHeight: 10, padding: 28, font: { size: 13 }, color: '#4b5563' } } } },
   });
 }
+
+
+
 
 
 

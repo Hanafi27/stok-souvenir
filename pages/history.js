@@ -1,5 +1,5 @@
 ﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=mbos-logo-final-20260810';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-white-final-20260810';
 import { getActiveItems } from '../services/items.js?v=history-hide-display-20260807';
 import { listTransactions } from '../services/transactions.js?v=history-hide-display-20260807';
 import { formatDate, formatNumber } from '../utils/format.js';
@@ -193,6 +193,8 @@ function saveHiddenTransactionIds(ids) {
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 }
+
+
 
 
 
