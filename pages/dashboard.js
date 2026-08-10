@@ -1,5 +1,5 @@
 ﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-white-final-20260810';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-red-navbar-sidebar-20260810';
 import { dashboardStats } from '../services/transactions.js';
 import { formatNumber } from '../utils/format.js';
 
@@ -162,6 +162,7 @@ function renderTopItemsChart(rows) {
     options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, boxHeight: 10, padding: 28, font: { size: 13 }, color: '#4b5563' } } } },
   });
 }
+
 
 
 

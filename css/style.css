@@ -1948,3 +1948,26 @@ a:hover,
   background: #ffffff !important;
 }
 
+
+/* Force MBOS red sidebar and navbar across all pages */
+.sidebar {
+  background: linear-gradient(180deg, #7f1d1d 0%, #b91c1c 50%, #dc2626 100%) !important;
+  border-right-color: rgba(255, 255, 255, .18) !important;
+}
+.topbar {
+  background: linear-gradient(90deg, #991b1b, #dc2626) !important;
+  border-bottom: 0 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(185, 28, 28, .16) !important;
+}
+.topbar .page-title,
+.topbar .page-subtitle {
+  color: #ffffff !important;
+}
+.topbar .btn-outline-secondary {
+  --bs-btn-color: #ffffff;
+  --bs-btn-border-color: rgba(255,255,255,.72);
+  --bs-btn-hover-bg: rgba(255,255,255,.14);
+  --bs-btn-hover-border-color: #ffffff;
+  --bs-btn-hover-color: #ffffff;
+}

@@ -10,7 +10,21 @@ const links = [
   ['reports.html', 'bi-file-earmark-spreadsheet', 'Laporan'],
 ];
 
+function layoutThemeStyle() {
+  if (document.getElementById('mbosLayoutTheme')) return;
+  document.head.insertAdjacentHTML('beforeend', <style id="mbosLayoutTheme">
+    .sidebar { background: linear-gradient(180deg, #7f1d1d 0%, #b91c1c 50%, #dc2626 100%) !important; border-right-color: rgba(255,255,255,.18) !important; }
+    .sidebar-nav a { color: rgba(255,255,255,.86) !important; }
+    .sidebar-nav a.active, .sidebar-nav a:hover { background: rgba(255,255,255,.16) !important; color: #fff !important; box-shadow: inset 4px 0 0 #fff !important; }
+    .sidebar-brand .brand-image-mark { background: #fff !important; }
+    .topbar { background: linear-gradient(90deg, #991b1b, #dc2626) !important; border-bottom: 0 !important; color: #fff !important; box-shadow: 0 10px 24px rgba(185, 28, 28, .16) !important; }
+    .topbar .page-title, .topbar .page-subtitle { color: #fff !important; }
+    .topbar .btn-outline-secondary { --bs-btn-color: #fff; --bs-btn-border-color: rgba(255,255,255,.72); --bs-btn-hover-bg: rgba(255,255,255,.14); --bs-btn-hover-border-color: #fff; --bs-btn-hover-color: #fff; }
+  </style>);
+}
+
 export function renderLayout(user, title = '') {
+  layoutThemeStyle();
   const current = location.pathname.split('/').pop() || 'dashboard.html';
   const nav = links.map(([href, icon, label]) => `
     <a href="${href}" class="${current === href ? 'active' : ''}">
@@ -21,7 +35,7 @@ export function renderLayout(user, title = '') {
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=mbos-logo-final-20260810" alt="Logo MBOS"></div>
+        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=mbos-red-navbar-sidebar-20260810" alt="Logo MBOS"></div>
         <div>
           <div class="fw-bold text-white">${APP_NAME}</div>
           <small class="text-white-50">Manajemen Stok</small>
@@ -74,6 +88,7 @@ export function appShell(title, content) {
       </main>
     </div>`;
 }
+
 
 
 
