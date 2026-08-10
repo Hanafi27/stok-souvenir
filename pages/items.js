@@ -1,5 +1,5 @@
 ﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-logo-final-20260810';
 import {
   listItems,
   getItem,
@@ -266,5 +266,6 @@ async function removeSelectedItems() {
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 }
+
 
 

@@ -1,5 +1,5 @@
 ﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-logo-final-20260810';
 import { getActiveItems } from '../services/items.js';
 import { createTransaction } from '../services/transactions.js';
 import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js';
@@ -80,3 +80,4 @@ async function saveTransaction(event) {
     showAlert(document.getElementById('alertBox'), error.message);
   }
 }
+

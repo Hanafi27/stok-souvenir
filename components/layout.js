@@ -21,7 +21,7 @@ export function renderLayout(user, title = '') {
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png" alt="Logo MBOS"></div>
+        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=mbos-logo-final-20260810" alt="Logo MBOS"></div>
         <div>
           <div class="fw-bold text-white">${APP_NAME}</div>
           <small class="text-white-50">Manajemen Stok</small>
@@ -74,6 +74,7 @@ export function appShell(title, content) {
       </main>
     </div>`;
 }
+
 
 
 

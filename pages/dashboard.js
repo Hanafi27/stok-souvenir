@@ -1,5 +1,5 @@
 ﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-logo-final-20260810';
 import { dashboardStats } from '../services/transactions.js';
 import { formatNumber } from '../utils/format.js';
 
@@ -13,7 +13,7 @@ if (user) {
         <h2>Monitoring stok souvenir</h2>
         <p class="mb-0">Pantau posisi stok, transaksi bulan berjalan, dan barang yang perlu segera ditindaklanjuti.</p>
       </div>
-      <div class="dashboard-hero-mark"><img src="assets/mbos.png" alt="Logo MBOS"></div>
+      <div class="dashboard-hero-mark"><img src="assets/mbos.png?v=mbos-logo-final-20260810" alt="Logo MBOS"></div>
     </div>
     <div class="dashboard-metrics mb-3" id="metrics"></div>
     <div class="dashboard-grid">
@@ -162,6 +162,8 @@ function renderTopItemsChart(rows) {
     options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, boxHeight: 10, padding: 28, font: { size: 13 }, color: '#4b5563' } } } },
   });
 }
+
+
 
 
 

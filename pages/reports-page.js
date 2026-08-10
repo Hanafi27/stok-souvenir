@@ -1,5 +1,5 @@
 ﻿import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js';
+import { renderLayout, appShell } from '../components/layout.js?v=mbos-logo-final-20260810';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
@@ -149,5 +149,6 @@ function formatPeriod(period, value) {
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 }
+
 
 
