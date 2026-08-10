@@ -12,7 +12,7 @@ const links = [
 
 function layoutThemeStyle() {
   if (document.getElementById('mbosLayoutTheme')) return;
-  document.head.insertAdjacentHTML('beforeend', <style id="mbosLayoutTheme">
+  document.head.insertAdjacentHTML('beforeend', `<style id="mbosLayoutTheme">
     .sidebar { background: linear-gradient(180deg, #7f1d1d 0%, #b91c1c 50%, #dc2626 100%) !important; border-right-color: rgba(255,255,255,.18) !important; }
     .sidebar-nav a { color: rgba(255,255,255,.86) !important; }
     .sidebar-nav a.active, .sidebar-nav a:hover { background: rgba(255,255,255,.16) !important; color: #fff !important; box-shadow: inset 4px 0 0 #fff !important; }
@@ -20,7 +20,7 @@ function layoutThemeStyle() {
     .topbar { background: linear-gradient(90deg, #991b1b, #dc2626) !important; border-bottom: 0 !important; color: #fff !important; box-shadow: 0 10px 24px rgba(185, 28, 28, .16) !important; }
     .topbar .page-title, .topbar .page-subtitle { color: #fff !important; }
     .topbar .btn-outline-secondary { --bs-btn-color: #fff; --bs-btn-border-color: rgba(255,255,255,.72); --bs-btn-hover-bg: rgba(255,255,255,.14); --bs-btn-hover-border-color: #fff; --bs-btn-hover-color: #fff; }
-  </style>);
+  </style>`);
 }
 
 export function renderLayout(user, title = '') {
