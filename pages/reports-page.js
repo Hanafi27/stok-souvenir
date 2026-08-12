@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=custom-select-red-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=clean-excel-report-20260812';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
@@ -7,7 +7,7 @@ let currentRows = [];
 let currentReport = { period: 'daily', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-template-excel-perner-20260812';
+const REPORT_UI_VERSION = 'report-clean-excel-20260812';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -86,24 +86,22 @@ function buildExcelDocument() {
     <head>
       <meta charset="UTF-8">
       <style>
-        body { font-family: Arial, sans-serif; color: #1f2937; }
+        body { font-family: Arial, sans-serif; color: #111827; }
         .sheet { width: 100%; }
-        h1 { color: #b91c1c; font-size: 22px; margin: 0 0 4px; }
-        .meta { color: #6b7280; margin: 0 0 16px; font-size: 12px; }
-        .summary { margin: 0 0 14px; border-collapse: collapse; width: 100%; }
-        .summary td { border: 1px solid #fecaca; padding: 8px 10px; background: #fff7f7; }
-        .summary .label { color: #6b7280; font-size: 11px; }
-        .summary .value { color: #991b1b; font-size: 18px; font-weight: bold; }
+        h1 { font-size: 18px; margin: 0 0 4px; font-weight: bold; }
+        .meta { margin: 0 0 14px; font-size: 12px; }
+        .summary { margin: 0 0 14px; border-collapse: collapse; width: 520px; }
+        .summary td { border: 1px solid #9ca3af; padding: 6px 8px; background: #ffffff; }
+        .summary .label { font-size: 11px; }
+        .summary .value { font-size: 16px; font-weight: bold; text-align: right; }
         table.data { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        table.data th { background: #dc2626; color: #ffffff; font-weight: bold; text-align: left; }
-        table.data th, table.data td { border: 1px solid #f3b7b7; padding: 8px; vertical-align: top; }
+        table.data th { background: #ffffff; color: #111827; font-weight: bold; text-align: left; }
+        table.data th, table.data td { border: 1px solid #9ca3af; padding: 6px 8px; vertical-align: top; }
         table.data td { background: #ffffff; }
-        table.data tr:nth-child(even) td { background: #fff7f7; }
-        .in { color: #991b1b; background: #fee2e2; font-weight: bold; text-align: center; }
-        .out { color: #ffffff; background: #dc2626; font-weight: bold; text-align: center; }
+        .in, .out { font-weight: normal; text-align: left; }
         .number { text-align: right; }
-        .empty { text-align: center; color: #6b7280; }
-        .footer { margin-top: 14px; color: #6b7280; font-size: 11px; }
+        .empty { text-align: center; }
+        .footer { margin-top: 14px; font-size: 11px; }
       </style>
     </head>
     <body>
@@ -119,13 +117,13 @@ function buildExcelDocument() {
         </table>
         <table class="data">
           <colgroup>
-            <col style="width: 95px;">
-            <col style="width: 95px;">
-            <col style="width: 180px;">
-            <col style="width: 80px;">
-            <col style="width: 70px;">
+            <col style="width: 110px;">
+            <col style="width: 110px;">
+            <col style="width: 220px;">
             <col style="width: 90px;">
-            <col style="width: 260px;">
+            <col style="width: 80px;">
+            <col style="width: 120px;">
+            <col style="width: 320px;">
           </colgroup>
           <thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th>Jumlah</th><th>PIC</th><th>Keterangan</th></tr></thead>
           <tbody>${rows}</tbody>

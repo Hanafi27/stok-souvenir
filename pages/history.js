@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=custom-select-red-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=clean-excel-report-20260812';
 import { getActiveItems } from '../services/items.js?v=history-hide-display-20260807';
 import { listTransactions } from '../services/transactions.js?v=history-hide-display-20260807';
 import { formatDate, formatNumber } from '../utils/format.js';
