@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=ready-excel-logbook-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=initial-stock-report-20260812';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
@@ -112,6 +112,7 @@ function buildLogbookRows() {
     if (!grouped.has(key)) {
       grouped.set(key, {
         name: row.items?.item_name || '-',
+        initialStock: Number(row.items?.initial_stock || 0),
         description: row.description || '',
         incoming: 0,
         outgoingByDate: Object.fromEntries(dateKeys.map((date) => [date, 0])),
@@ -119,6 +120,7 @@ function buildLogbookRows() {
       });
     }
     const item = grouped.get(key);
+    if (!item.initialStock && row.items?.initial_stock) item.initialStock = Number(row.items.initial_stock || 0);
     if (!item.description && row.description) item.description = row.description;
     if (row.pic) item.pic.add(row.pic);
     if (row.transaction_type === 'IN') item.incoming += Number(row.quantity || 0);
@@ -137,10 +139,10 @@ function buildLogbookRows() {
       index + 1,
       item.name,
       item.description,
-      '',
+      item.initialStock || '',
       item.incoming || '',
       ...outgoingValues,
-      totalOut ? -totalOut + Number(item.incoming || 0) : item.incoming || '',
+      Number(item.initialStock || 0) + Number(item.incoming || 0) - totalOut,
       [...item.pic].join(', '),
     ];
   });

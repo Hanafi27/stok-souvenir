@@ -79,7 +79,7 @@ export async function dashboardStats() {
 
 export async function reportTransactions(period, value) {
   ensureSupabaseConfigured();
-  let query = supabase.from('transactions').select('*, items(item_code, item_name)').order('transaction_date', { ascending: true });
+  let query = supabase.from('transactions').select('*, items(item_code, item_name, initial_stock, current_stock)').order('transaction_date', { ascending: true });
   if (period === 'daily') query = query.eq('transaction_date', value);
   if (period === 'monthly') {
     const [year, month] = value.split('-').map(Number);
