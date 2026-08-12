@@ -1,8 +1,8 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=plain-excel-success-v3-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=sheet2-logbook-export-20260812';
 import { getActiveItems } from '../services/items.js';
 import { createTransaction } from '../services/transactions.js';
-import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=plain-excel-success-v3-20260812';
+import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=sheet2-logbook-export-20260812';
 
 const type = document.body.dataset.transactionType || 'IN';
 const isOut = type === 'OUT';

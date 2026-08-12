@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=plain-excel-success-v3-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=sheet2-logbook-export-20260812';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
@@ -7,7 +7,7 @@ let currentRows = [];
 let currentReport = { period: 'daily', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-plain-cells-20260812';
+const REPORT_UI_VERSION = 'report-sheet2-logbook-20260812';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -75,35 +75,78 @@ function exportExcel() {
 }
 
 function buildExcelDocument() {
-  const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
-  const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
+  const itemRows = buildLogbookRows();
+  const dateColumns = buildDateColumns();
   const rows = [
-    [`Laporan Stok Souvenir - ${periodLabels[currentReport.period] || 'Harian'}`],
-    [`Periode: ${formatPeriod(currentReport.period, currentReport.value)}`],
     [],
-    ['Total Transaksi', currentRows.length],
-    ['Total Barang Masuk', incoming],
-    ['Total Barang Keluar', outgoing],
     [],
-    ['Tanggal', 'Kode Barang', 'Barang', 'Jenis', 'Jumlah', 'PIC', 'Keterangan'],
-    ...(currentRows.length ? currentRows.map(excelRow) : [['Tidak ada data laporan.']]),
+    ['', 'LOG BOOK SOUVENIR'],
     [],
-    ['Dokumen ini dihasilkan dari Sistem Stok Souvenir.'],
+    [],
+    ['', 'No', 'Nama Barang', 'Keterangan', 'Awal Stock', 'Barang Masuk', 'Barang Keluar', ...dateColumns.slice(1), 'Sisa Stock', 'PIC'],
+    ['', '', '', '', '', '', ...dateColumns, '', ''],
+    ...itemRows,
+    [],
   ];
 
   return rows.map((row) => row.map(excelCell).join('\t')).join('\r\n');
 }
 
-function excelRow(row) {
-  return [
-    formatDate(row.transaction_date),
-    row.items?.item_code || '-',
-    row.items?.item_name || '-',
-    row.transaction_type === 'IN' ? 'Masuk' : 'Keluar',
-    Number(row.quantity || 0),
-    row.pic || '-',
-    row.description || '-',
-  ];
+function buildDateColumns() {
+  const dates = [...new Set(currentRows
+    .filter((row) => row.transaction_type === 'OUT')
+    .map((row) => row.transaction_date)
+    .filter(Boolean))]
+    .sort();
+  if (dates.length) return dates.map((date) => formatDate(date));
+  return currentReport.value ? [formatPeriod(currentReport.period, currentReport.value)] : [''];
+}
+
+function buildLogbookRows() {
+  const dateKeys = [...new Set(currentRows
+    .filter((row) => row.transaction_type === 'OUT')
+    .map((row) => row.transaction_date)
+    .filter(Boolean))]
+    .sort();
+  const grouped = new Map();
+
+  currentRows.forEach((row) => {
+    const key = row.item_id || row.items?.item_name || 'item';
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        name: row.items?.item_name || '-',
+        description: row.description || '',
+        incoming: 0,
+        outgoingByDate: Object.fromEntries(dateKeys.map((date) => [date, 0])),
+        pic: new Set(),
+      });
+    }
+    const item = grouped.get(key);
+    if (!item.description && row.description) item.description = row.description;
+    if (row.pic) item.pic.add(row.pic);
+    if (row.transaction_type === 'IN') item.incoming += Number(row.quantity || 0);
+    if (row.transaction_type === 'OUT' && row.transaction_date) {
+      item.outgoingByDate[row.transaction_date] = (item.outgoingByDate[row.transaction_date] || 0) + Number(row.quantity || 0);
+    }
+  });
+
+  if (!grouped.size) return [['', '', 'Tidak ada data laporan.']];
+
+  return [...grouped.values()].map((item, index) => {
+    const outgoingValues = dateKeys.length ? dateKeys.map((date) => item.outgoingByDate[date] || '') : [''];
+    const totalOut = Object.values(item.outgoingByDate).reduce((sum, qty) => sum + Number(qty || 0), 0);
+    return [
+      '',
+      index + 1,
+      item.name,
+      item.description,
+      '',
+      item.incoming || '',
+      ...outgoingValues,
+      totalOut ? -totalOut + Number(item.incoming || 0) : item.incoming || '',
+      [...item.pic].join(', '),
+    ];
+  });
 }
 
 function excelCell(value) {
