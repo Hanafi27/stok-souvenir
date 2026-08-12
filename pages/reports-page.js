@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=success-info-alert-v2-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=plain-excel-success-v3-20260812';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
@@ -7,7 +7,7 @@ let currentRows = [];
 let currentReport = { period: 'daily', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-clean-excel-20260812';
+const REPORT_UI_VERSION = 'report-plain-cells-20260812';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -77,66 +77,38 @@ function exportExcel() {
 function buildExcelDocument() {
   const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
   const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
-  const rows = currentRows.length
-    ? currentRows.map(excelRow).join('')
-    : '<tr><td colspan="7" class="empty">Tidak ada data laporan.</td></tr>';
+  const rows = [
+    [`Laporan Stok Souvenir - ${periodLabels[currentReport.period] || 'Harian'}`],
+    [`Periode: ${formatPeriod(currentReport.period, currentReport.value)}`],
+    [],
+    ['Total Transaksi', currentRows.length],
+    ['Total Barang Masuk', incoming],
+    ['Total Barang Keluar', outgoing],
+    [],
+    ['Tanggal', 'Kode Barang', 'Barang', 'Jenis', 'Jumlah', 'PIC', 'Keterangan'],
+    ...(currentRows.length ? currentRows.map(excelRow) : [['Tidak ada data laporan.']]),
+    [],
+    ['Dokumen ini dihasilkan dari Sistem Stok Souvenir.'],
+  ];
 
-  return `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: Arial, sans-serif; color: #111827; }
-        .sheet { width: 100%; }
-        h1 { font-size: 18px; margin: 0 0 4px; font-weight: bold; }
-        .meta { margin: 0 0 14px; font-size: 12px; }
-        .summary { margin: 0 0 14px; border-collapse: collapse; width: 520px; }
-        .summary td { border: 1px solid #9ca3af; padding: 6px 8px; background: #ffffff; }
-        .summary .label { font-size: 11px; }
-        .summary .value { font-size: 16px; font-weight: bold; text-align: right; }
-        table.data { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        table.data th { background: #ffffff; color: #111827; font-weight: bold; text-align: left; }
-        table.data th, table.data td { border: 1px solid #9ca3af; padding: 6px 8px; vertical-align: top; }
-        table.data td { background: #ffffff; }
-        .in, .out { font-weight: normal; text-align: left; }
-        .number { text-align: right; }
-        .empty { text-align: center; }
-        .footer { margin-top: 14px; font-size: 11px; }
-      </style>
-    </head>
-    <body>
-      <div class="sheet">
-        <h1>Laporan Stok Souvenir - ${escapeHtml(periodLabels[currentReport.period] || 'Harian')}</h1>
-        <div class="meta">Periode: ${escapeHtml(formatPeriod(currentReport.period, currentReport.value))}</div>
-        <table class="summary">
-          <tr>
-            <td><div class="label">Total Transaksi</div><div class="value">${formatNumber(currentRows.length)}</div></td>
-            <td><div class="label">Total Barang Masuk</div><div class="value">${formatNumber(incoming)}</div></td>
-            <td><div class="label">Total Barang Keluar</div><div class="value">${formatNumber(outgoing)}</div></td>
-          </tr>
-        </table>
-        <table class="data">
-          <colgroup>
-            <col style="width: 110px;">
-            <col style="width: 110px;">
-            <col style="width: 220px;">
-            <col style="width: 90px;">
-            <col style="width: 80px;">
-            <col style="width: 120px;">
-            <col style="width: 320px;">
-          </colgroup>
-          <thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th>Jumlah</th><th>PIC</th><th>Keterangan</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <div class="footer">Dokumen ini dihasilkan dari Sistem Stok Souvenir.</div>
-      </div>
-    </body></html>`;
+  return rows.map((row) => row.map(excelCell).join('\t')).join('\r\n');
 }
 
 function excelRow(row) {
-  const typeLabel = row.transaction_type === 'IN' ? 'Masuk' : 'Keluar';
-  const typeClass = row.transaction_type === 'IN' ? 'in' : 'out';
-  return `<tr><td>${escapeHtml(formatDate(row.transaction_date))}</td><td>${escapeHtml(row.items?.item_code || '-')}</td><td>${escapeHtml(row.items?.item_name || '-')}</td><td class="${typeClass}">${typeLabel}</td><td class="number">${Number(row.quantity || 0)}</td><td>${escapeHtml(row.pic || '-')}</td><td>${escapeHtml(row.description || '-')}</td></tr>`;
+  return [
+    formatDate(row.transaction_date),
+    row.items?.item_code || '-',
+    row.items?.item_name || '-',
+    row.transaction_type === 'IN' ? 'Masuk' : 'Keluar',
+    Number(row.quantity || 0),
+    row.pic || '-',
+    row.description || '-',
+  ];
+}
+
+function excelCell(value) {
+  const text = String(value ?? '');
+  return /[\t\r\n"]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
 function changeInputType() {

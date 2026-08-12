@@ -45,7 +45,10 @@ function csvValue(value) {
 export function showAlert(container, message, type = 'danger') {
   if (!container) return;
   const alertType = String(message).toLowerCase().includes('berhasil') && type !== 'warning' ? 'info' : type;
-  container.innerHTML = `<div class="alert alert-${alertType} app-alert-${alertType} mb-0" role="alert">${message}</div>`;
+  const neutralStyle = alertType === 'info' || alertType === 'success'
+    ? ' style="background:#eff6ff;border-color:#bfdbfe;color:#1e40af;"'
+    : '';
+  container.innerHTML = `<div class="alert alert-${alertType} app-alert-${alertType} mb-0" role="alert"${neutralStyle}>${message}</div>`;
 }
 
 export function clearAlert(container) {
