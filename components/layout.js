@@ -1,5 +1,6 @@
 import { APP_NAME } from '../js/config.js';
 import { logout } from '../services/auth.js';
+import { initCustomSelects } from './custom-select.js?v=custom-select-red-20260812';
 
 const links = [
   ['dashboard.html', 'bi-speedometer2', 'Dasbor'],
@@ -38,7 +39,7 @@ export function renderLayout(user, title = '') {
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=sidebar-logout-20260812" alt="Logo MBOS"></div>
+        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=custom-select-red-20260812" alt="Logo MBOS"></div>
         <div>
           <div class="fw-bold text-white">${APP_NAME}</div>
           <small class="text-white-50">Manajemen Stok</small>
@@ -86,6 +87,7 @@ export function renderLayout(user, title = '') {
     sidebar?.classList.remove('show');
     backdrop?.classList.remove('show');
   });
+  initCustomSelects();
 }
 
 export function appShell(title, content) {
