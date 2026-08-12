@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=perner-excel-template-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=dropdown-red-theme-20260812';
 import {
   listItems,
   getItem,
