@@ -1,6 +1,6 @@
 ﻿import { redirectIfAuthenticated, login, resetPassword } from '../services/auth.js';
 import { isSupabaseConfigured } from '../services/supabase.js';
-import { showAlert, clearAlert, getQueryParam } from '../utils/format.js';
+import { showAlert, clearAlert, getQueryParam } from '../utils/format.js?v=success-info-alert-v2-20260812';
 import { PERNER_LOGIN_MAP } from '../js/config.js';
 
 const form = document.getElementById('loginForm');

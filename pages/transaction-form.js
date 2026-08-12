@@ -1,8 +1,8 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=neutral-success-alert-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=success-info-alert-v2-20260812';
 import { getActiveItems } from '../services/items.js';
 import { createTransaction } from '../services/transactions.js';
-import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js';
+import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=success-info-alert-v2-20260812';
 
 const type = document.body.dataset.transactionType || 'IN';
 const isOut = type === 'OUT';

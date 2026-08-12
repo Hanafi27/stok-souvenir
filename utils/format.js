@@ -44,7 +44,8 @@ function csvValue(value) {
 
 export function showAlert(container, message, type = 'danger') {
   if (!container) return;
-  container.innerHTML = `<div class="alert alert-${type} mb-0" role="alert">${message}</div>`;
+  const alertType = String(message).toLowerCase().includes('berhasil') && type !== 'warning' ? 'info' : type;
+  container.innerHTML = `<div class="alert alert-${alertType} app-alert-${alertType} mb-0" role="alert">${message}</div>`;
 }
 
 export function clearAlert(container) {

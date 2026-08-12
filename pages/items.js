@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=neutral-success-alert-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=success-info-alert-v2-20260812';
 import {
   listItems,
   getItem,
@@ -11,7 +11,7 @@ import {
   listItemTransactions,
   getNextItemCode,
 } from '../services/items.js?v=items-view-no-edit-20260807';
-import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js';
+import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=success-info-alert-v2-20260812';
 
 let items = [];
 let editingId = null;

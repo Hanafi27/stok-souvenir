@@ -2256,3 +2256,13 @@ a:hover,
   color: #9ca3af;
   cursor: not-allowed;
 }
+
+/* Success messages must feel positive, not like errors */
+.alert-info,
+.alert-success,
+.app-alert-info,
+.app-alert-success {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1e40af !important;
+}
