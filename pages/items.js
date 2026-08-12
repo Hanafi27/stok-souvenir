@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=perner-100001-email-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=perner-direct-login-20260812';
 import {
   listItems,
   getItem,
@@ -11,7 +11,7 @@ import {
   listItemTransactions,
   getNextItemCode,
 } from '../services/items.js?v=items-view-no-edit-20260807';
-import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=perner-100001-email-20260812';
+import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=perner-direct-login-20260812';
 
 let items = [];
 let editingId = null;

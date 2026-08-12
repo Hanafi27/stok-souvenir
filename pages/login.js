@@ -1,7 +1,6 @@
 ﻿import { redirectIfAuthenticated, login, resetPassword } from '../services/auth.js';
 import { isSupabaseConfigured } from '../services/supabase.js';
-import { showAlert, clearAlert, getQueryParam } from '../utils/format.js?v=success-info-alert-v2-20260812';
-import { PERNER_LOGIN_MAP } from '../js/config.js?v=perner-100001-email-20260812';
+import { showAlert, clearAlert, getQueryParam } from '../utils/format.js?v=perner-direct-login-20260812';
 
 const form = document.getElementById('loginForm');
 const alertBox = document.getElementById('loginAlert');
@@ -43,8 +42,7 @@ forgotPasswordForm?.addEventListener('submit', async (event) => {
   button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim';
   try {
     const formData = new FormData(forgotPasswordForm);
-    const email = resolvePernerEmail(normalizePerner(formData.get('perner')));
-    await resetPassword(email);
+    await resetPassword(resolvePernerEmail(normalizePerner(formData.get('perner'))));
     showAlert(forgotPasswordAlert, 'Link reset password sudah dikirim. Periksa akun terdaftar.', 'success');
     forgotPasswordForm.reset();
   } catch (error) {
@@ -56,15 +54,11 @@ forgotPasswordForm?.addEventListener('submit', async (event) => {
 });
 
 function normalizePerner(value) {
-  return String(value || '').trim().toUpperCase();
+  return String(value || '').trim().toLowerCase();
 }
 
 function resolvePernerEmail(perner) {
   if (!perner) throw new Error('Perner wajib diisi.');
-  if (perner.includes('@')) return perner.toLowerCase();
-  const email = PERNER_LOGIN_MAP?.[perner];
-  if (!email || email.includes('ganti-dengan-email-supabase')) {
-    throw new Error(`Perner ${perner} belum dipetakan ke akun Supabase.`);
-  }
-  return email;
+  if (perner.includes('@')) return perner;
+  return `${perner}@perner.local`;
 }
