@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=clean-excel-report-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=neutral-success-alert-20260812';
 import {
   listItems,
   getItem,

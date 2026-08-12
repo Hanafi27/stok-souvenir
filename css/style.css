@@ -1954,9 +1954,9 @@ a:hover,
   color: #991b1b !important;
 }
 .alert-success {
-  background: #fff1f2 !important;
-  border-color: #fecaca !important;
-  color: #991b1b !important;
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1e40af !important;
 }
 .report-header,
 .dashboard-hero {
@@ -2044,8 +2044,6 @@ a:hover,
   color: #ffffff !important;
 }
 
-.alert-success,
-.badge-in,
 .badge-soft,
 .transaction-pill.in,
 .history-summary-card.in .summary-icon,
@@ -2074,6 +2072,12 @@ a:hover,
 .report-table thead th {
   background: #fff1f2 !important;
   color: #7f1d1d !important;
+}
+
+.alert-info {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1e40af !important;
 }
 
 /* Unified dropdown and select styling */

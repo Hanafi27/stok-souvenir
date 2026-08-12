@@ -1,6 +1,6 @@
 import { APP_NAME } from '../js/config.js';
 import { logout } from '../services/auth.js';
-import { initCustomSelects } from './custom-select.js?v=clean-excel-report-20260812';
+import { initCustomSelects } from './custom-select.js?v=neutral-success-alert-20260812';
 
 const links = [
   ['dashboard.html', 'bi-speedometer2', 'Dasbor'],
@@ -39,7 +39,7 @@ export function renderLayout(user, title = '') {
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=clean-excel-report-20260812" alt="Logo MBOS"></div>
+        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=neutral-success-alert-20260812" alt="Logo MBOS"></div>
         <div>
           <div class="fw-bold text-white">${APP_NAME}</div>
           <small class="text-white-50">Manajemen Stok</small>

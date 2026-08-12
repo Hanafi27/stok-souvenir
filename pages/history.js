@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=clean-excel-report-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=neutral-success-alert-20260812';
 import { getActiveItems } from '../services/items.js?v=history-hide-display-20260807';
 import { listTransactions } from '../services/transactions.js?v=history-hide-display-20260807';
 import { formatDate, formatNumber } from '../utils/format.js';
@@ -174,7 +174,7 @@ async function runDelete(ids) {
     selectedTransactionIds.delete(id);
   });
   saveHiddenTransactionIds(hiddenIds);
-  document.getElementById('alertBox').innerHTML = `<div class="alert alert-danger">${formatNumber(ids.length)} transaksi berhasil dihapus dari tampilan.</div>`;
+  document.getElementById('alertBox').innerHTML = `<div class="alert alert-info">${formatNumber(ids.length)} transaksi berhasil dihapus dari tampilan.</div>`;
   await loadRows();
 }
 

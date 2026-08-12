@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=clean-excel-report-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=neutral-success-alert-20260812';
 import { getActiveItems } from '../services/items.js';
 import { createTransaction } from '../services/transactions.js';
 import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js';
@@ -71,7 +71,7 @@ async function saveTransaction(event) {
   }
   try {
     await createTransaction(payload);
-    showAlert(document.getElementById('alertBox'), 'Transaksi berhasil disimpan.', 'success');
+    showAlert(document.getElementById('alertBox'), 'Transaksi berhasil disimpan.', 'info');
     form.reset();
     setToday(form.transaction_date);
     await loadItems();
