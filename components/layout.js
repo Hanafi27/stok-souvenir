@@ -16,6 +16,8 @@ function layoutThemeStyle() {
     .sidebar { background: linear-gradient(180deg, #7f1d1d 0%, #b91c1c 50%, #dc2626 100%) !important; border-right-color: rgba(255,255,255,.18) !important; }
     .sidebar-nav a { color: rgba(255,255,255,.86) !important; }
     .sidebar-nav a.active, .sidebar-nav a:hover { background: rgba(255,255,255,.16) !important; color: #fff !important; box-shadow: inset 4px 0 0 #fff !important; }
+    .sidebar-logout { color: rgba(255,255,255,.9) !important; }
+    .sidebar-logout:hover { background: rgba(255,255,255,.16) !important; color: #fff !important; }
     .sidebar-brand .brand-image-mark { background: #fff !important; }
     .topbar { background: linear-gradient(90deg, #991b1b, #dc2626) !important; border-bottom: 0 !important; color: #fff !important; box-shadow: 0 10px 24px rgba(185, 28, 28, .16) !important; }
     .topbar .page-title, .topbar .page-subtitle { color: #fff !important; }
@@ -36,13 +38,18 @@ export function renderLayout(user, title = '') {
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=dropdown-red-theme-20260812" alt="Logo MBOS"></div>
+        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=sidebar-logout-20260812" alt="Logo MBOS"></div>
         <div>
           <div class="fw-bold text-white">${APP_NAME}</div>
           <small class="text-white-50">Manajemen Stok</small>
         </div>
       </div>
       <nav class="sidebar-nav">${nav}</nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-logout" type="button" id="sidebarLogoutButton">
+          <i class="bi bi-box-arrow-right"></i><span>Keluar</span>
+        </button>
+      </div>
     </aside>
   `);
 
@@ -68,6 +75,7 @@ export function renderLayout(user, title = '') {
   }
 
   document.getElementById('logoutButton')?.addEventListener('click', logout);
+  document.getElementById('sidebarLogoutButton')?.addEventListener('click', logout);
   const sidebar = document.getElementById('sidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
   document.getElementById('menuButton')?.addEventListener('click', () => {

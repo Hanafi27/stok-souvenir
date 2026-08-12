@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=dropdown-red-theme-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=sidebar-logout-20260812';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
