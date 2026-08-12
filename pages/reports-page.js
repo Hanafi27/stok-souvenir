@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=sheet2-logbook-export-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=ready-excel-logbook-20260812';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
@@ -7,7 +7,7 @@ let currentRows = [];
 let currentReport = { period: 'daily', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-sheet2-logbook-20260812';
+const REPORT_UI_VERSION = 'report-ready-excel-20260812';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -77,19 +77,16 @@ function exportExcel() {
 function buildExcelDocument() {
   const itemRows = buildLogbookRows();
   const dateColumns = buildDateColumns();
+  const columnCount = 9 + Math.max(dateColumns.length - 1, 0);
   const rows = [
-    [],
-    [],
     ['', 'LOG BOOK SOUVENIR'],
-    [],
     [],
     ['', 'No', 'Nama Barang', 'Keterangan', 'Awal Stock', 'Barang Masuk', 'Barang Keluar', ...dateColumns.slice(1), 'Sisa Stock', 'PIC'],
     ['', '', '', '', '', '', ...dateColumns, '', ''],
     ...itemRows,
-    [],
   ];
 
-  return rows.map((row) => row.map(excelCell).join('\t')).join('\r\n');
+  return excelWorkbook(rows, columnCount);
 }
 
 function buildDateColumns() {
@@ -151,7 +148,41 @@ function buildLogbookRows() {
 
 function excelCell(value) {
   const text = String(value ?? '');
-  return /[\t\r\n"]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  return text.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+}
+
+function excelWorkbook(rows, columnCount) {
+  const columns = [32, 48, 240, 150, 80, 90, 90, ...Array(Math.max(columnCount - 9, 0)).fill(86), 90, 140];
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Top" ss:WrapText="1"/><Font ss:FontName="Calibri" ss:Size="11"/></Style>
+  <Style ss:ID="Title"><Font ss:FontName="Calibri" ss:Size="12" ss:Bold="1"/></Style>
+  <Style ss:ID="Header"><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>
+  <Style ss:ID="Cell"><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>
+  <Style ss:ID="Number"><Alignment ss:Horizontal="Center" ss:Vertical="Top"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>
+ </Styles>
+ <Worksheet ss:Name="Sheet2">
+  <Table>${columns.map((width) => `<Column ss:Width="${width}"/>`).join('')}
+   ${rows.map((row, rowIndex) => excelXmlRow(row, rowIndex)).join('')}
+  </Table>
+ </Worksheet>
+</Workbook>`;
+}
+
+function excelXmlRow(row, rowIndex) {
+  const isTitle = rowIndex === 0;
+  const isHeader = rowIndex === 2 || rowIndex === 3;
+  return `<Row>${row.map((value, index) => {
+    const isNumber = typeof value === 'number';
+    const style = isTitle && index === 1 ? 'Title' : isHeader ? 'Header' : isNumber ? 'Number' : 'Cell';
+    const type = isNumber ? 'Number' : 'String';
+    return `<Cell ss:StyleID="${style}"><Data ss:Type="${type}">${excelCell(value)}</Data></Cell>`;
+  }).join('')}</Row>`;
 }
 
 function changeInputType() {
