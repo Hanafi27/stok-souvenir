@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=initial-stock-report-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=perner-100001-email-20260812';
 import { dashboardStats } from '../services/transactions.js';
 import { formatNumber } from '../utils/format.js';
 
@@ -13,7 +13,7 @@ if (user) {
         <h2>Monitoring stok souvenir</h2>
         <p class="mb-0">Pantau posisi stok, transaksi bulan berjalan, dan barang yang perlu segera ditindaklanjuti.</p>
       </div>
-      <div class="dashboard-hero-mark"><img src="assets/mbos.png?v=initial-stock-report-20260812" alt="Logo MBOS"></div>
+      <div class="dashboard-hero-mark"><img src="assets/mbos.png?v=perner-100001-email-20260812" alt="Logo MBOS"></div>
     </div>
     <div class="dashboard-metrics mb-3" id="metrics"></div>
     <div class="dashboard-grid">
