@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=mbos-layout-syntax-fix-20260810';
+import { renderLayout, appShell } from '../components/layout.js?v=perner-excel-template-20260812';
 import { reportTransactions } from '../services/transactions.js';
 import { formatDate, formatNumber, setToday } from '../utils/format.js';
 
@@ -7,7 +7,7 @@ let currentRows = [];
 let currentReport = { period: 'daily', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-plain-excel-20260810';
+const REPORT_UI_VERSION = 'report-template-excel-perner-20260812';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -63,25 +63,7 @@ function resetFilters() {
 
 function exportExcel() {
   const filename = `laporan-stok-souvenir-${currentReport.period}-${currentReport.value || new Date().toISOString().slice(0, 10)}.xls`;
-  const headers = ['Tanggal', 'Kode Barang', 'Barang', 'Jenis', 'Jumlah', 'PIC', 'Keterangan'];
-  const rows = currentRows.map((row) => [
-    formatDate(row.transaction_date),
-    row.items?.item_code || '-',
-    row.items?.item_name || '-',
-    row.transaction_type === 'IN' ? 'Masuk' : 'Keluar',
-    Number(row.quantity || 0),
-    row.pic || '-',
-    row.description || '-',
-  ]);
-  const metaRows = [
-    ['Laporan Stok Souvenir'],
-    [`Periode: ${formatPeriod(currentReport.period, currentReport.value)}`],
-    [],
-  ];
-  const worksheet = [...metaRows, headers, ...rows]
-    .map((row) => row.map(excelCell).join('\t'))
-    .join('\r\n');
-  const blob = new Blob(['\ufeff', worksheet], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const blob = new Blob(['\ufeff', buildExcelDocument()], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -92,11 +74,65 @@ function exportExcel() {
   URL.revokeObjectURL(url);
 }
 
-function excelCell(value) {
-  const text = String(value ?? '');
-  return text.includes('\t') || text.includes('\n') || text.includes('\r') || text.includes('"')
-    ? `"${text.replace(/"/g, '""')}"`
-    : text;
+function buildExcelDocument() {
+  const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
+  const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
+  const rows = currentRows.length
+    ? currentRows.map(excelRow).join('')
+    : '<tr><td colspan="7" class="empty">Tidak ada data laporan.</td></tr>';
+
+  return `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; color: #1f2937; }
+        .sheet { width: 100%; }
+        h1 { color: #b91c1c; font-size: 22px; margin: 0 0 4px; }
+        .meta { color: #6b7280; margin: 0 0 16px; font-size: 12px; }
+        .summary { margin: 0 0 14px; border-collapse: collapse; width: 100%; }
+        .summary td { border: 1px solid #fecaca; padding: 8px 10px; background: #fff7f7; }
+        .summary .label { color: #6b7280; font-size: 11px; }
+        .summary .value { color: #991b1b; font-size: 18px; font-weight: bold; }
+        table.data { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        table.data th { background: #dc2626; color: #ffffff; font-weight: bold; text-align: left; }
+        table.data th, table.data td { border: 1px solid #f3b7b7; padding: 8px; vertical-align: top; }
+        table.data td { background: #ffffff; }
+        table.data tr:nth-child(even) td { background: #fff7f7; }
+        .in { color: #991b1b; background: #fee2e2; font-weight: bold; text-align: center; }
+        .out { color: #ffffff; background: #dc2626; font-weight: bold; text-align: center; }
+        .number { text-align: right; }
+        .empty { text-align: center; color: #6b7280; }
+        .footer { margin-top: 14px; color: #6b7280; font-size: 11px; }
+      </style>
+    </head>
+    <body>
+      <div class="sheet">
+        <h1>Laporan Stok Souvenir - ${escapeHtml(periodLabels[currentReport.period] || 'Harian')}</h1>
+        <div class="meta">Periode: ${escapeHtml(formatPeriod(currentReport.period, currentReport.value))}</div>
+        <table class="summary">
+          <tr>
+            <td><div class="label">Total Transaksi</div><div class="value">${formatNumber(currentRows.length)}</div></td>
+            <td><div class="label">Total Barang Masuk</div><div class="value">${formatNumber(incoming)}</div></td>
+            <td><div class="label">Total Barang Keluar</div><div class="value">${formatNumber(outgoing)}</div></td>
+          </tr>
+        </table>
+        <table class="data">
+          <colgroup>
+            <col style="width: 95px;">
+            <col style="width: 95px;">
+            <col style="width: 180px;">
+            <col style="width: 80px;">
+            <col style="width: 70px;">
+            <col style="width: 90px;">
+            <col style="width: 260px;">
+          </colgroup>
+          <thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th>Jumlah</th><th>PIC</th><th>Keterangan</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="footer">Dokumen ini dihasilkan dari Sistem Stok Souvenir.</div>
+      </div>
+    </body></html>`;
 }
 
 function excelRow(row) {

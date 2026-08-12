@@ -3,4 +3,7 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_uRIZJFZqjXcdlKm8qVmxCw_6zZ-voMb
 
 export const APP_NAME = 'Stok Souvenir WKS';
 
+export const PERNER_LOGIN_MAP = {
+  '100001': 'ganti-dengan-email-supabase@contoh.com',
+};
 

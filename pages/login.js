@@ -1,6 +1,7 @@
 ﻿import { redirectIfAuthenticated, login, resetPassword } from '../services/auth.js';
 import { isSupabaseConfigured } from '../services/supabase.js';
 import { showAlert, clearAlert, getQueryParam } from '../utils/format.js';
+import { PERNER_LOGIN_MAP } from '../js/config.js';
 
 const form = document.getElementById('loginForm');
 const alertBox = document.getElementById('loginAlert');
@@ -21,11 +22,13 @@ form?.addEventListener('submit', async (event) => {
   submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Masuk';
   try {
     const formData = new FormData(form);
-    const email = String(formData.get('email') || '').trim();
+    const perner = normalizePerner(formData.get('perner'));
+    const email = resolvePernerEmail(perner);
     await login(email, formData.get('password'));
+    localStorage.setItem('app_perner', perner);
     window.location.href = getQueryParam('next') || 'dashboard.html';
   } catch (error) {
-    showAlert(alertBox, error.message || 'Masuk gagal. Periksa email dan kata sandi.');
+    showAlert(alertBox, error.message || 'Masuk gagal. Periksa Perner dan kata sandi.');
   } finally {
     submitButton.disabled = false;
     submitButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Masuk';
@@ -40,8 +43,9 @@ forgotPasswordForm?.addEventListener('submit', async (event) => {
   button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim';
   try {
     const formData = new FormData(forgotPasswordForm);
-    await resetPassword(String(formData.get('email') || '').trim());
-    showAlert(forgotPasswordAlert, 'Link reset password sudah dikirim. Periksa email terdaftar.', 'success');
+    const email = resolvePernerEmail(normalizePerner(formData.get('perner')));
+    await resetPassword(email);
+    showAlert(forgotPasswordAlert, 'Link reset password sudah dikirim. Periksa akun terdaftar.', 'success');
     forgotPasswordForm.reset();
   } catch (error) {
     showAlert(forgotPasswordAlert, error.message || 'Gagal mengirim link reset password.');
@@ -51,6 +55,16 @@ forgotPasswordForm?.addEventListener('submit', async (event) => {
   }
 });
 
+function normalizePerner(value) {
+  return String(value || '').trim().toUpperCase();
+}
 
-
-
+function resolvePernerEmail(perner) {
+  if (!perner) throw new Error('Perner wajib diisi.');
+  if (perner.includes('@')) return perner.toLowerCase();
+  const email = PERNER_LOGIN_MAP?.[perner];
+  if (!email || email.includes('ganti-dengan-email-supabase')) {
+    throw new Error(`Perner ${perner} belum dipetakan ke akun Supabase.`);
+  }
+  return email;
+}

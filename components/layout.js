@@ -26,6 +26,7 @@ function layoutThemeStyle() {
 export function renderLayout(user, title = '') {
   layoutThemeStyle();
   const current = location.pathname.split('/').pop() || 'dashboard.html';
+  const userLabel = localStorage.getItem('app_perner') || 'Pengguna';
   const nav = links.map(([href, icon, label]) => `
     <a href="${href}" class="${current === href ? 'active' : ''}">
       <i class="bi ${icon}"></i><span>${label}</span>
@@ -35,7 +36,7 @@ export function renderLayout(user, title = '') {
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=mbos-layout-syntax-fix-20260810" alt="Logo MBOS"></div>
+        <div class="brand-mark brand-image-mark"><img src="assets/mbos.png?v=perner-excel-template-20260812" alt="Logo MBOS"></div>
         <div>
           <div class="fw-bold text-white">${APP_NAME}</div>
           <small class="text-white-50">Manajemen Stok</small>
@@ -55,10 +56,10 @@ export function renderLayout(user, title = '') {
       </div>
       <div class="dropdown">
         <button class="btn btn-outline-secondary btn-icon" data-bs-toggle="dropdown" type="button">
-          <i class="bi bi-person-circle"></i><span class="d-none d-sm-inline">${user?.email || 'Pengguna'}</span>
+          <i class="bi bi-person-circle"></i><span class="d-none d-sm-inline">${userLabel}</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><span class="dropdown-item-text small text-muted">${user?.email || ''}</span></li>
+          <li><span class="dropdown-item-text small text-muted">${userLabel}</span></li>
           <li><hr class="dropdown-divider"></li>
           <li><button class="dropdown-item" type="button" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Keluar</button></li>
         </ul>

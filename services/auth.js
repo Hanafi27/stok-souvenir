@@ -27,6 +27,7 @@ export async function login(email, password) {
 export async function logout() {
   ensureSupabaseConfigured();
   await supabase.auth.signOut();
+  localStorage.removeItem('app_perner');
   window.location.href = 'login.html';
 }
 
