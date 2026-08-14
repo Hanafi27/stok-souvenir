@@ -1,8 +1,8 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=perner-direct-login-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=session-history-hide-20260814';
 import { getActiveItems } from '../services/items.js';
 import { createTransaction } from '../services/transactions.js';
-import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=perner-direct-login-20260812';
+import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=session-history-hide-20260814';
 
 const type = document.body.dataset.transactionType || 'IN';
 const isOut = type === 'OUT';

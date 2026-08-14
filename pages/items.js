@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=perner-direct-login-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=session-history-hide-20260814';
 import {
   listItems,
   getItem,
@@ -11,7 +11,7 @@ import {
   listItemTransactions,
   getNextItemCode,
 } from '../services/items.js?v=items-view-no-edit-20260807';
-import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=perner-direct-login-20260812';
+import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=session-history-hide-20260814';
 
 let items = [];
 let editingId = null;

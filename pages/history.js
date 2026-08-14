@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=perner-direct-login-20260812';
+import { renderLayout, appShell } from '../components/layout.js?v=session-history-hide-20260814';
 import { getActiveItems } from '../services/items.js?v=history-hide-display-20260807';
 import { listTransactions } from '../services/transactions.js?v=history-hide-display-20260807';
 import { formatDate, formatNumber } from '../utils/format.js';
@@ -8,10 +8,11 @@ let items = [];
 let currentRows = [];
 let selectedTransactionIds = new Set();
 let searchTimer;
-const HIDDEN_HISTORY_KEY = 'hidden_history_transaction_ids';
+const hiddenTransactionIds = new Set();
 
 const user = await requireAuth();
 if (user) {
+  localStorage.removeItem('hidden_history_transaction_ids');
   document.body.innerHTML = appShell('Riwayat Transaksi', `
     <div class="history-filter-panel panel mb-3 no-print">
       <div class="panel-heading history-panel-heading">
@@ -77,8 +78,7 @@ function resetFilters() {
 async function loadRows() {
   try {
     const filters = Object.fromEntries(new FormData(document.getElementById('filterForm')).entries());
-    const hiddenIds = getHiddenTransactionIds();
-    currentRows = (await listTransactions(filters)).filter((row) => !hiddenIds.has(row.id));
+    currentRows = (await listTransactions(filters)).filter((row) => !hiddenTransactionIds.has(row.id));
     selectedTransactionIds = new Set([...selectedTransactionIds].filter((id) => currentRows.some((row) => row.id === id)));
     renderSummary(currentRows);
     document.getElementById('historyResultText').textContent = `${formatNumber(currentRows.length)} transaksi ditemukan`;
@@ -168,26 +168,12 @@ async function removeSelectedTransactions() {
 }
 
 async function runDelete(ids) {
-  const hiddenIds = getHiddenTransactionIds();
   ids.forEach((id) => {
-    hiddenIds.add(id);
+    hiddenTransactionIds.add(id);
     selectedTransactionIds.delete(id);
   });
-  saveHiddenTransactionIds(hiddenIds);
-  document.getElementById('alertBox').innerHTML = `<div class="alert alert-info">${formatNumber(ids.length)} transaksi berhasil dihapus dari tampilan.</div>`;
+  document.getElementById('alertBox').innerHTML = `<div class="alert alert-info">${formatNumber(ids.length)} transaksi disembunyikan sementara dari tampilan. Data tetap tersimpan di database.</div>`;
   await loadRows();
-}
-
-function getHiddenTransactionIds() {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(HIDDEN_HISTORY_KEY) || '[]'));
-  } catch {
-    return new Set();
-  }
-}
-
-function saveHiddenTransactionIds(ids) {
-  localStorage.setItem(HIDDEN_HISTORY_KEY, JSON.stringify([...ids]));
 }
 
 function escapeHtml(value) {
