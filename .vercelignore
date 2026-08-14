@@ -1,9 +1,0 @@
-Log Book Souvenir.xlsx
-data/
-docs/sheet2-digitalization-analysis.md
-google-appscript-version/
-supabase/seed_sheet2.sql
-.git/
-.agents/
-.codex/
-*.log
