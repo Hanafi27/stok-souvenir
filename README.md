@@ -10,7 +10,7 @@ Aplikasi web statis untuk mendigitalisasi logbook stok souvenir dari Excel ke si
 - Vanilla JavaScript ES Modules
 - Supabase JavaScript SDK
 - PostgreSQL Supabase
-- GitHub Pages
+- Vercel
 
 Tidak membutuhkan PHP, Laravel, Express, Node.js backend, Firebase, atau Google Apps Script.
 
@@ -63,25 +63,53 @@ export const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
 
 ## Menjalankan Lokal
 
-Karena aplikasi memakai ES Modules, jalankan melalui local web server.
+Karena aplikasi memakai ES Modules, jalankan melalui Vercel local server.
 
 ```powershell
-python -m http.server 8080
+vercel dev
 ```
 
 Lalu buka:
 
 ```text
-http://localhost:8080/login.html
+http://localhost:3000/login
 ```
 
-## Deploy GitHub Pages
+## Deploy Vercel
 
-1. Push seluruh folder proyek ke repository GitHub.
-2. Buka repository Settings > Pages.
-3. Pilih branch utama dan root folder.
-4. Simpan konfigurasi.
-5. Buka URL GitHub Pages yang diberikan.
+Vercel dapat dipakai tanpa menghubungkan repository GitHub. Deploy bisa dilakukan langsung dari folder project.
+
+1. Install Vercel CLI.
+
+```powershell
+npm i -g vercel
+```
+
+2. Login ke Vercel.
+
+```powershell
+vercel login
+```
+
+3. Deploy preview dari root project.
+
+```powershell
+vercel
+```
+
+4. Deploy production.
+
+```powershell
+vercel --prod
+```
+
+5. Setelah mendapat domain Vercel, tambahkan URL aplikasi ke Supabase:
+
+- Supabase Dashboard > Authentication > URL Configuration
+- `Site URL`: isi domain Vercel production
+- `Redirect URLs`: tambahkan domain Vercel, misalnya `https://nama-project.vercel.app/**`
+
+File `vercel.json` sudah disiapkan untuk static hosting dan clean URL seperti `/login`, `/dashboard`, `/items`, dan `/reports`.
 
 ## Aturan Stok
 

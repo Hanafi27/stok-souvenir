@@ -1,4 +1,4 @@
-﻿# Local/source data not needed for GitHub Pages
+# Local/source data not needed for deployment
 Log Book Souvenir.xlsx
 -n
 
@@ -13,3 +13,4 @@ Log Book Souvenir.xlsx
 Thumbs.db
 .vscode/
 .idea/
+.vercel/

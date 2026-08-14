@@ -12,7 +12,7 @@ Build a responsive web-based inventory management system for managing souvenir s
 
 The application will replace the existing Excel-based stock book with a modern online application.
 
-The application must be lightweight, easy to maintain, and deployable using **GitHub Pages + Supabase** without requiring PHP, Laravel, or any traditional backend server.
+The application must be lightweight, easy to maintain, and deployable using **Vercel + Supabase** without requiring PHP, Laravel, or any traditional backend server.
 
 The application must work on:
 
@@ -44,11 +44,12 @@ Authentication
 
 Hosting
 
-* GitHub Pages
+* Vercel
 
 Version Control
 
-* GitHub
+* Vercel CLI or Vercel Dashboard
+
 
 Do NOT use:
 
@@ -59,7 +60,7 @@ Do NOT use:
 * Firebase
 * Google Apps Script
 
-The application must be entirely frontend-based while using Supabase as Backend-as-a-Service.
+The application must be entirely frontend-based while using Supabase as Backend-as-a-Service and Vercel as static hosting.
 
 ---
 
@@ -470,7 +471,7 @@ Generate:
 
 11. Clean reusable JavaScript modules
 
-12. README.md explaining installation, Supabase configuration, deployment to GitHub Pages, and project architecture.
+12. README.md explaining installation, Supabase configuration, deployment to Vercel, and project architecture.
 
 
 <!-- Password supabase -->
