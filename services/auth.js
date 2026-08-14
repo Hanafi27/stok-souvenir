@@ -28,6 +28,7 @@ export async function logout() {
   ensureSupabaseConfigured();
   await supabase.auth.signOut();
   localStorage.removeItem('app_perner');
+  localStorage.removeItem('app_user_email');
   window.location.href = 'login.html';
 }
 
@@ -37,4 +38,18 @@ export async function resetPassword(email) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) throw error;
   return data;
+}
+
+export async function updatePassword(password) {
+  ensureSupabaseConfigured();
+  const { data, error } = await supabase.auth.updateUser({ password });
+  if (error) throw error;
+  return data;
+}
+
+export function onPasswordRecovery(callback) {
+  if (!isSupabaseConfigured()) return null;
+  return supabase.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') callback();
+  });
 }
