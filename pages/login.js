@@ -4,7 +4,7 @@ import {
   resetPassword,
   updatePassword,
   onPasswordRecovery,
-} from '../services/auth.js';
+} from '../services/auth.js?v=email-reset-login-20260814';
 import { isSupabaseConfigured } from '../services/supabase.js';
 import { showAlert, clearAlert, getQueryParam } from '../utils/format.js?v=email-reset-login-20260814';
 
@@ -15,6 +15,8 @@ const forgotPasswordForm = document.getElementById('forgotPasswordForm');
 const forgotPasswordAlert = document.getElementById('forgotPasswordAlert');
 const newPasswordForm = document.getElementById('newPasswordForm');
 const newPasswordAlert = document.getElementById('newPasswordAlert');
+
+stripCredentialQuery();
 
 if (!isSupabaseConfigured()) {
   showAlert(alertBox, 'Supabase belum dikonfigurasi. Isi js/config.js terlebih dahulu.', 'warning');
@@ -103,4 +105,14 @@ function showNewPasswordModal() {
   const modalElement = document.getElementById('newPasswordModal');
   if (!modalElement) return;
   bootstrap.Modal.getOrCreateInstance(modalElement).show();
+}
+
+function stripCredentialQuery() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('email') && !params.has('password')) return;
+  params.delete('email');
+  params.delete('password');
+  const query = params.toString();
+  const cleanUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+  window.history.replaceState({}, document.title, cleanUrl);
 }
