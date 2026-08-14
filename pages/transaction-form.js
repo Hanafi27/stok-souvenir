@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=stock-edit-20260814';
+import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
 import { getActiveItems } from '../services/items.js';
 import { createTransaction } from '../services/transactions.js';
 import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=stock-edit-20260814';

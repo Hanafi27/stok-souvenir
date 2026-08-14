@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=stock-edit-20260814';
+import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
 import {
   listItems,
   getItem,

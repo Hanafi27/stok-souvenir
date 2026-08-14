@@ -1,4 +1,4 @@
-import { APP_NAME } from '../js/config.js';
+import { APP_NAME } from '../js/config.js?v=sidebar-title-20260814';
 import { logout } from '../services/auth.js';
 import { initCustomSelects } from './custom-select.js?v=email-reset-login-20260814';
 

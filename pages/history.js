@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=email-reset-login-20260814';
+import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
 import { getActiveItems } from '../services/items.js?v=history-hide-display-20260807';
 import { listTransactions } from '../services/transactions.js?v=history-hide-display-20260807';
 import { formatDate, formatNumber } from '../utils/format.js';
