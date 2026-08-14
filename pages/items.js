@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=email-reset-login-20260814';
+import { renderLayout, appShell } from '../components/layout.js?v=stock-edit-20260814';
 import {
   listItems,
   getItem,
@@ -10,8 +10,8 @@ import {
   countItemTransactions,
   listItemTransactions,
   getNextItemCode,
-} from '../services/items.js?v=items-view-no-edit-20260807';
-import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=email-reset-login-20260814';
+} from '../services/items.js?v=stock-edit-20260814';
+import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=stock-edit-20260814';
 
 let items = [];
 let editingId = null;
@@ -34,7 +34,7 @@ if (user) {
 
     <div class="modal fade" id="viewItemModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><div><p class="modal-kicker mb-1" id="viewItemCode">Kode Barang</p><h2 class="modal-title h5" id="viewItemName">Detail Barang</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="viewItemBody"><div class="empty-state">Memuat detail barang...</div></div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button></div></div></div></div>
 
-    <div class="modal fade" id="itemModal" tabindex="-1"><div class="modal-dialog"><form class="modal-content" id="itemForm"><div class="modal-header"><h2 class="modal-title h5" id="modalTitle">Tambah Barang</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="modalAlert" class="mb-3"></div><div class="mb-3"><label class="form-label">Kode Barang</label><input class="form-control" id="itemCode" readonly></div><div class="mb-3"><label class="form-label">Nama Barang</label><input class="form-control" name="item_name" required></div><div class="mb-3"><label class="form-label">Keterangan</label><textarea class="form-control" name="description" rows="3"></textarea></div><div class="row g-3"><div class="col-sm-6"><label class="form-label">Stok Awal</label><input class="form-control" name="initial_stock" type="number" min="0" required></div><div class="col-sm-6"><label class="form-label">Stok Minimum</label><input class="form-control" name="minimum_stock" type="number" min="0" value="10" required></div></div><div class="form-check form-switch mt-3"><input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked><label class="form-check-label" for="isActive">Aktif</label></div></div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary btn-icon"><i class="bi bi-save"></i>Simpan</button></div></form></div></div>`);
+    <div class="modal fade" id="itemModal" tabindex="-1"><div class="modal-dialog"><form class="modal-content" id="itemForm"><div class="modal-header"><h2 class="modal-title h5" id="modalTitle">Tambah Barang</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="modalAlert" class="mb-3"></div><div class="mb-3"><label class="form-label">Kode Barang</label><input class="form-control" id="itemCode" readonly></div><div class="mb-3"><label class="form-label">Nama Barang</label><input class="form-control" name="item_name" required></div><div class="mb-3"><label class="form-label">Keterangan</label><textarea class="form-control" name="description" rows="3"></textarea></div><div class="stock-edit-box"><div class="row g-3"><div class="col-sm-4"><label class="form-label">Stok Awal</label><input class="form-control" name="initial_stock" type="number" min="0" required></div><div class="col-sm-4"><label class="form-label">Stok Saat Ini</label><input class="form-control" name="current_stock" type="number" min="0" required></div><div class="col-sm-4"><label class="form-label">Stok Minimum</label><input class="form-control" name="minimum_stock" type="number" min="0" value="10" required></div></div><div class="form-text mt-2">Gunakan Stok Saat Ini untuk koreksi stok manual.</div></div><div class="form-check form-switch mt-3"><input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked><label class="form-check-label" for="isActive">Aktif</label></div></div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary btn-icon"><i class="bi bi-save"></i>Simpan</button></div></form></div></div>`);
   renderLayout(user, 'Master Barang');
   bindEvents();
   await loadItems();
@@ -46,6 +46,7 @@ function bindEvents() {
   document.getElementById('bulkHapusButton').addEventListener('click', removeSelectedItems);
   document.getElementById('selectAllItems').addEventListener('change', toggleSelectAll);
   document.getElementById('itemForm').addEventListener('submit', saveItem);
+  document.querySelector('[name="initial_stock"]').addEventListener('input', syncCurrentStockForNewItem);
 }
 
 async function loadItems(search = '') {
@@ -106,6 +107,7 @@ async function openCreateModal() {
   const form = document.getElementById('itemForm');
   form.reset();
   form.initial_stock.disabled = false;
+  form.current_stock.disabled = false;
   form.is_active.checked = true;
   document.getElementById('modalTitle').textContent = 'Tambah Barang';
   document.getElementById('itemCode').value = await getNextItemCode();
@@ -176,13 +178,23 @@ function openEditModal(item) {
   form.item_name.value = item.item_name;
   form.description.value = item.description || '';
   form.initial_stock.value = item.initial_stock;
-  form.initial_stock.disabled = true;
+  form.initial_stock.disabled = false;
+  form.current_stock.disabled = false;
+  form.current_stock.value = item.current_stock;
   form.minimum_stock.value = item.minimum_stock || 10;
   form.is_active.checked = item.is_active;
   document.getElementById('itemCode').value = item.item_code;
   document.getElementById('modalTitle').textContent = 'Ubah Barang';
   clearAlert(document.getElementById('modalAlert'));
   bootstrap.Modal.getOrCreateInstance(document.getElementById('itemModal')).show();
+}
+
+function syncCurrentStockForNewItem(event) {
+  if (editingId) return;
+  const form = document.getElementById('itemForm');
+  if (!form.current_stock.value || Number(form.current_stock.value) === 0) {
+    form.current_stock.value = event.currentTarget.value;
+  }
 }
 
 async function saveItem(event) {

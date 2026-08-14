@@ -2266,3 +2266,221 @@ a:hover,
   border-color: #bfdbfe !important;
   color: #1e40af !important;
 }
+
+/* Transaction forms */
+.transaction-page {
+  max-width: 1180px;
+}
+
+.transaction-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7f1d1d, #dc2626);
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(185, 28, 28, .14);
+}
+
+.transaction-hero-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .16);
+  border: 1px solid rgba(255, 255, 255, .26);
+  font-size: 1.55rem;
+}
+
+.transaction-kicker {
+  margin: 0 0 4px;
+  color: rgba(255, 255, 255, .78);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.transaction-hero h2 {
+  margin: 0 0 4px;
+  font-size: clamp(1.3rem, 2.2vw, 1.85rem);
+  font-weight: 800;
+}
+
+.transaction-hero p:last-child {
+  margin: 0;
+  color: rgba(255, 255, 255, .86);
+}
+
+.transaction-form-panel,
+.transaction-summary-panel {
+  border-color: #fecaca !important;
+  box-shadow: 0 12px 28px rgba(127, 29, 29, .06);
+}
+
+.transaction-form-panel .form-label {
+  color: #7f1d1d;
+  font-weight: 700;
+}
+
+.transaction-form-panel .form-control,
+.transaction-form-panel .form-select,
+.transaction-form-panel .custom-select-toggle {
+  border-color: #fecaca !important;
+  background-color: #fffafa !important;
+}
+
+.transaction-submit {
+  width: 100%;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.transaction-summary-panel {
+  position: sticky;
+  top: 88px;
+}
+
+.transaction-empty-summary {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+  color: #7f1d1d;
+  background: #fff7f7;
+  border: 1px dashed #fecaca;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.transaction-empty-summary i {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 1.45rem;
+}
+
+.transaction-empty-summary span {
+  color: #6b7280;
+}
+
+.transaction-stock-summary {
+  display: grid;
+  gap: 14px;
+}
+
+.summary-item-title {
+  padding: 14px;
+  border-radius: 8px;
+  background: #fff7f7;
+  border: 1px solid #fecaca;
+}
+
+.summary-item-title span {
+  color: #b91c1c;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.summary-item-title h3 {
+  margin: 3px 0 0;
+  font-size: 1.05rem;
+  color: #111827;
+  font-weight: 800;
+}
+
+.summary-stock-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-stock-grid div {
+  min-height: 94px;
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.summary-stock-grid span {
+  display: block;
+  color: #6b7280;
+  font-size: .82rem;
+}
+
+.summary-stock-grid strong {
+  display: block;
+  margin-top: 8px;
+  color: #7f1d1d;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.summary-stock-grid .danger strong {
+  color: #b91c1c;
+}
+
+.summary-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.summary-status.ok {
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.summary-status.danger {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.stock-edit-box {
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff7f7;
+}
+
+@media (max-width: 991.98px) {
+  .transaction-summary-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .transaction-hero {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .transaction-hero-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+
+  .summary-stock-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-empty-summary {
+    min-height: 200px;
+  }
+}

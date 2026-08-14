@@ -25,11 +25,15 @@ export async function getItem(id) {
 
 export async function createItem(payload) {
   ensureSupabaseConfigured();
+  const initialStock = Number(payload.initial_stock || 0);
+  const currentStock = payload.current_stock === '' || payload.current_stock == null
+    ? initialStock
+    : Number(payload.current_stock || 0);
   const row = {
     item_name: payload.item_name,
     description: payload.description || '',
-    initial_stock: Number(payload.initial_stock || 0),
-    current_stock: Number(payload.initial_stock || 0),
+    initial_stock: initialStock,
+    current_stock: currentStock,
     minimum_stock: Number(payload.minimum_stock || 10),
     is_active: true,
   };
@@ -43,6 +47,8 @@ export async function updateItem(id, payload) {
   const row = {
     item_name: payload.item_name,
     description: payload.description || '',
+    initial_stock: Number(payload.initial_stock || 0),
+    current_stock: Number(payload.current_stock || 0),
     minimum_stock: Number(payload.minimum_stock || 10),
     is_active: Boolean(payload.is_active),
   };
