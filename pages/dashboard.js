@@ -1,5 +1,5 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=email-reset-login-20260814';
+import { renderLayout, appShell } from '../components/layout.js?v=mobile-dashboard-20260814';
 import { dashboardStats } from '../services/transactions.js';
 import { formatNumber } from '../utils/format.js';
 
@@ -13,7 +13,7 @@ if (user) {
         <h2>Monitoring stok souvenir</h2>
         <p class="mb-0">Pantau posisi stok, transaksi bulan berjalan, dan barang yang perlu segera ditindaklanjuti.</p>
       </div>
-      <div class="dashboard-hero-mark"><img src="assets/mbos.png?v=email-reset-login-20260814" alt="Logo MBOS"></div>
+      <div class="dashboard-hero-mark"><img src="assets/mbos.png?v=mobile-dashboard-20260814" alt="Logo MBOS"></div>
     </div>
     <div class="dashboard-metrics mb-3" id="metrics"></div>
     <div class="dashboard-grid">
@@ -53,6 +53,8 @@ if (user) {
   renderLayout(user, 'Dasbor');
   loadDashboard();
 }
+
+const isMobileView = () => window.matchMedia('(max-width: 575.98px)').matches;
 
 async function loadDashboard() {
   try {
@@ -117,6 +119,7 @@ function lowStockItem(item) {
 }
 
 function renderMonthlyChart(rows) {
+  const mobile = isMobileView();
   const days = {};
   rows.forEach((row) => {
     const key = row.transaction_date;
@@ -130,26 +133,27 @@ function renderMonthlyChart(rows) {
     data: {
       labels,
       datasets: [
-        { label: 'Barang Masuk', data: labels.map((d) => days[d].in), backgroundColor: 'rgba(220, 38, 38, .88)', borderColor: '#dc2626', borderWidth: 1, borderRadius: 6, maxBarThickness: 42, categoryPercentage: .56, barPercentage: .72 },
-        { label: 'Barang Keluar', data: labels.map((d) => days[d].out), backgroundColor: 'rgba(237, 28, 36, .82)', borderColor: '#ED1C24', borderWidth: 1, borderRadius: 6, maxBarThickness: 42, categoryPercentage: .56, barPercentage: .72 },
+        { label: 'Barang Masuk', data: labels.map((d) => days[d].in), backgroundColor: 'rgba(220, 38, 38, .88)', borderColor: '#dc2626', borderWidth: 1, borderRadius: 6, maxBarThickness: mobile ? 28 : 42, categoryPercentage: mobile ? .48 : .56, barPercentage: mobile ? .62 : .72 },
+        { label: 'Barang Keluar', data: labels.map((d) => days[d].out), backgroundColor: 'rgba(237, 28, 36, .82)', borderColor: '#ED1C24', borderWidth: 1, borderRadius: 6, maxBarThickness: mobile ? 28 : 42, categoryPercentage: mobile ? .48 : .56, barPercentage: mobile ? .62 : .72 },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, boxHeight: 10, padding: 28, font: { size: 13 }, color: '#4b5563' } },
+        legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 9, boxHeight: 9, padding: mobile ? 14 : 28, font: { size: mobile ? 11 : 13 }, color: '#4b5563' } },
         tooltip: { backgroundColor: '#111827', padding: 10, displayColors: true },
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#6b7280', maxRotation: 0 } },
-        y: { beginAtZero: true, ticks: { precision: 0, color: '#6b7280' }, grid: { color: 'rgba(107, 114, 128, .16)' } },
+        x: { grid: { display: false }, ticks: { color: '#6b7280', maxRotation: mobile ? 35 : 0, autoSkip: true, maxTicksLimit: mobile ? 4 : 8, font: { size: mobile ? 10 : 12 } } },
+        y: { beginAtZero: true, ticks: { precision: 0, color: '#6b7280', font: { size: mobile ? 10 : 12 } }, grid: { color: 'rgba(107, 114, 128, .16)' } },
       },
     },
   });
 }
 
 function renderTopItemsChart(rows) {
+  const mobile = isMobileView();
   const totals = {};
   rows.filter((row) => row.transaction_type === 'OUT').forEach((row) => {
     const name = row.items?.item_name || 'Tidak diketahui';
@@ -159,7 +163,7 @@ function renderTopItemsChart(rows) {
   new Chart(document.getElementById('topItemsChart'), {
     type: 'doughnut',
     data: { labels: entries.map(([name]) => name), datasets: [{ data: entries.map(([, qty]) => qty), backgroundColor: ['#dc2626', '#ED1C24', '#fecaca', '#f47b80', '#7f1d1d', '#b91218', '#fca5a5', '#d94b51', '#4b5563', '#fee2e2'], borderWidth: 0 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, boxHeight: 10, padding: 28, font: { size: 13 }, color: '#4b5563' } } } },
+    options: { responsive: true, maintainAspectRatio: false, cutout: mobile ? '62%' : '68%', plugins: { legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 9, boxHeight: 9, padding: mobile ? 12 : 28, font: { size: mobile ? 11 : 13 }, color: '#4b5563' } } } },
   });
 }
 

@@ -2484,3 +2484,232 @@ a:hover,
     min-height: 200px;
   }
 }
+
+/* Final dashboard mobile responsiveness */
+.dashboard-grid,
+.dashboard-metrics,
+.dashboard-grid > *,
+.dashboard-metrics > *,
+.chart-panel,
+.low-stock-panel,
+.chart-wrap,
+.chart-wrap-sm {
+  min-width: 0;
+}
+
+.chart-wrap canvas,
+.chart-wrap-sm canvas {
+  max-width: 100% !important;
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-grid .chart-panel,
+  .dashboard-grid .low-stock-panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .content-area {
+    width: 100%;
+    max-width: 100vw;
+    padding: 12px !important;
+    overflow-x: hidden;
+  }
+
+  .dashboard-hero {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    min-height: auto !important;
+  }
+
+  .dashboard-hero > div:first-child {
+    min-width: 0;
+  }
+
+  .dashboard-eyebrow {
+    margin-bottom: 6px !important;
+    font-size: .7rem !important;
+  }
+
+  .dashboard-hero h2 {
+    font-size: 1.18rem !important;
+    line-height: 1.2 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-hero p:not(.dashboard-eyebrow) {
+    font-size: .84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .dashboard-hero-mark {
+    width: 48px !important;
+    height: 48px !important;
+    padding: 6px !important;
+  }
+
+  .dashboard-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-metrics .metric-card {
+    min-height: 118px !important;
+    padding: 12px !important;
+  }
+
+  .metric-top {
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .metric-top span {
+    font-size: .68rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .metric-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+  }
+
+  .metric-value {
+    margin-top: 12px !important;
+    font-size: 1.34rem !important;
+  }
+
+  .metric-label {
+    font-size: .78rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .dashboard-grid {
+    gap: 12px !important;
+  }
+
+  .dashboard-grid .panel,
+  .low-stock-panel {
+    padding: 14px !important;
+    overflow: hidden;
+  }
+
+  .dashboard-grid .chart-panel {
+    min-height: auto !important;
+  }
+
+  .dashboard-grid .chart-panel .chart-wrap,
+  .dashboard-grid .chart-panel .chart-wrap-sm {
+    height: 260px !important;
+    min-height: 260px !important;
+  }
+
+  .panel-heading {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .panel-heading h2 {
+    font-size: .96rem !important;
+  }
+
+  .panel-heading p {
+    font-size: .78rem !important;
+  }
+
+  .panel-heading .toolbar {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .panel-heading .toolbar .btn,
+  .panel-heading .toolbar .panel-badge {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .low-stock-list {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .low-stock-item {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  .low-stock-main {
+    min-width: 0;
+    align-items: flex-start !important;
+  }
+
+  .low-stock-code {
+    flex: 0 0 auto;
+  }
+
+  .low-stock-name {
+    overflow-wrap: anywhere;
+    font-size: .92rem !important;
+  }
+
+  .low-stock-note {
+    font-size: .76rem !important;
+  }
+
+  .low-stock-side {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    align-items: center !important;
+    justify-items: stretch !important;
+    gap: 8px 12px !important;
+  }
+
+  .low-stock-side .stock-meter {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .dashboard-hero {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-hero-mark {
+    display: none !important;
+  }
+
+  .dashboard-metrics {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-grid .chart-panel .chart-wrap,
+  .dashboard-grid .chart-panel .chart-wrap-sm {
+    height: 240px !important;
+    min-height: 240px !important;
+  }
+
+  .panel-heading .toolbar {
+    flex-direction: column;
+  }
+
+  .panel-heading .toolbar .btn,
+  .panel-heading .toolbar .panel-badge {
+    width: 100%;
+  }
+}
