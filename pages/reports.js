@@ -1,10 +1,12 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
 import { reportTransactions } from '../services/transactions.js?v=item-actions-report-20260818';
+import { getActiveItems } from '../services/items.js?v=excel-items-backup-20260818';
 import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatDate, formatNumber, toISODate } from '../utils/format.js?v=data-sync-20260818';
 
 let currentRows = [];
+let currentItems = [];
 let currentReport = { period: 'monthly', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
@@ -89,7 +91,7 @@ function buildExcelDocument() {
     ...itemRows,
   ];
 
-  return excelWorkbook(rows, columnCount);
+  return excelWorkbook(rows, columnCount, buildItemDatabaseRows());
 }
 
 function buildDateColumns() {
@@ -110,12 +112,25 @@ function buildLogbookRows() {
     .sort();
   const grouped = new Map();
 
+  currentItems.forEach((item) => {
+    grouped.set(item.id, {
+      name: item.item_name || '-',
+      initialStock: Number(item.initial_stock || 0),
+      currentStock: Number(item.current_stock || 0),
+      description: item.description || '',
+      incoming: 0,
+      outgoingByDate: Object.fromEntries(dateKeys.map((date) => [date, 0])),
+      pic: new Set(),
+    });
+  });
+
   currentRows.forEach((row) => {
     const key = row.item_id || row.items?.item_name || 'item';
     if (!grouped.has(key)) {
       grouped.set(key, {
         name: row.items?.item_name || '-',
         initialStock: Number(row.items?.initial_stock || 0),
+        currentStock: Number(row.items?.current_stock || 0),
         description: row.items?.description || row.description || '',
         incoming: 0,
         outgoingByDate: Object.fromEntries(dateKeys.map((date) => [date, 0])),
@@ -137,6 +152,7 @@ function buildLogbookRows() {
   return [...grouped.values()].map((item, index) => {
     const outgoingValues = dateKeys.length ? dateKeys.map((date) => item.outgoingByDate[date] || '') : [''];
     const totalOut = Object.values(item.outgoingByDate).reduce((sum, qty) => sum + Number(qty || 0), 0);
+    const calculatedStock = Number(item.initialStock || 0) + Number(item.incoming || 0) - totalOut;
     return [
       '',
       index + 1,
@@ -145,10 +161,26 @@ function buildLogbookRows() {
       item.initialStock || '',
       item.incoming || '',
       ...outgoingValues,
-      Number(item.initialStock || 0) + Number(item.incoming || 0) - totalOut,
+      item.currentStock || calculatedStock,
       [...item.pic].join(', '),
     ];
   });
+}
+
+function buildItemDatabaseRows() {
+  return [
+    ['Kode Barang', 'Nama Barang', 'Keterangan', 'Stok Awal', 'Stok Saat Ini', 'Stok Minimum', 'Status', 'Dibuat'],
+    ...currentItems.map((item) => [
+      item.item_code || '',
+      item.item_name || '',
+      item.description || '',
+      Number(item.initial_stock || 0),
+      Number(item.current_stock || 0),
+      Number(item.minimum_stock || 0),
+      item.is_active === false ? 'Nonaktif' : 'Aktif',
+      item.created_at ? formatDate(item.created_at) : '',
+    ]),
+  ];
 }
 
 function excelCell(value) {
@@ -156,7 +188,7 @@ function excelCell(value) {
   return text.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 }
 
-function excelWorkbook(rows, columnCount) {
+function excelWorkbook(rows, columnCount, itemDatabaseRows) {
   const columns = [32, 48, 240, 150, 80, 90, 90, ...Array(Math.max(columnCount - 9, 0)).fill(86), 90, 140];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <?mso-application progid="Excel.Sheet"?>
@@ -174,6 +206,11 @@ function excelWorkbook(rows, columnCount) {
  <Worksheet ss:Name="Sheet2">
   <Table>${columns.map((width) => `<Column ss:Width="${width}"/>`).join('')}
    ${rows.map((row, rowIndex) => excelXmlRow(row, rowIndex)).join('')}
+  </Table>
+ </Worksheet>
+ <Worksheet ss:Name="Database Barang">
+  <Table>${[90, 220, 220, 80, 90, 90, 80, 130].map((width) => `<Column ss:Width="${width}"/>`).join('')}
+   ${itemDatabaseRows.map((row, rowIndex) => excelXmlRow(row, rowIndex === 0 ? 2 : 4)).join('')}
   </Table>
  </Worksheet>
 </Workbook>`;
@@ -205,7 +242,10 @@ async function generate() {
     const form = document.getElementById('reportForm');
     const { period, value } = Object.fromEntries(new FormData(form).entries());
     currentReport = { period, value };
-    currentRows = await reportTransactions(period, value);
+    [currentRows, currentItems] = await Promise.all([
+      reportTransactions(period, value),
+      getActiveItems(),
+    ]);
     const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
     const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
 
