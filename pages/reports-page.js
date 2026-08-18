@@ -1,7 +1,7 @@
 import { requireAuth } from '../services/auth.js';
-import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
-import { reportTransactions } from '../services/transactions.js?v=report-items-visible-20260818';
-import { listItems } from '../services/items.js?v=report-items-list-20260818';
+import { renderLayout, appShell } from '../components/layout.js?v=report-items-list-2-20260818';
+import { reportTransactions } from '../services/transactions.js?v=report-items-list-2-20260818';
+import { listItems } from '../services/items.js?v=report-items-list-2-20260818';
 import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatDate, formatNumber, toISODate } from '../utils/format.js?v=data-sync-20260818';
 
@@ -10,7 +10,7 @@ let currentItems = [];
 let currentReport = { period: 'monthly', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-items-visible-20260818';
+const REPORT_UI_VERSION = 'report-items-list-2-20260818';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();

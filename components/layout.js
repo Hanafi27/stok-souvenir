@@ -8,7 +8,7 @@ const links = [
   ['incoming.html', 'bi-box-arrow-in-down', 'Barang Masuk'],
   ['outgoing.html', 'bi-box-arrow-up', 'Barang Keluar'],
   ['history.html', 'bi-clock-history', 'Riwayat'],
-  ['reports.html', 'bi-file-earmark-spreadsheet', 'Laporan'],
+  ['reports.html?v=report-items-list-2-20260818', 'bi-file-earmark-spreadsheet', 'Laporan'],
 ];
 
 function layoutThemeStyle() {
@@ -31,7 +31,7 @@ export function renderLayout(user, title = '') {
   const current = location.pathname.split('/').pop() || 'dashboard.html';
   const userLabel = user?.email || localStorage.getItem('app_user_email') || 'Pengguna';
   const nav = links.map(([href, icon, label]) => `
-    <a href="${href}" class="${current === href ? 'active' : ''}">
+    <a href="${href}" class="${current === href.split('?')[0] ? 'active' : ''}">
       <i class="bi ${icon}"></i><span>${label}</span>
     </a>`).join('');
 
