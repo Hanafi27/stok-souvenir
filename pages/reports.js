@@ -41,7 +41,7 @@ if (user) {
           <h3>Rincian Transaksi</h3>
           <span id="printedAt"></span>
         </div>
-        <div class="table-responsive"><table class="table align-middle report-table"><thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th class="text-end">Jumlah</th><th>PIC</th><th>Keterangan</th></tr></thead><tbody id="rows"></tbody></table></div>
+        <div class="table-responsive"><table class="table align-middle report-table"><thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th class="text-end">Jumlah</th><th>Keterangan</th></tr></thead><tbody id="rows"></tbody></table></div>
       </section>
       <footer class="report-footer print-only">
         <span>Dokumen ini dihasilkan dari Sistem Stok Souvenir.</span>
@@ -89,12 +89,12 @@ function exportExcel() {
 function buildExcelDocument() {
   const itemRows = buildLogbookRows();
   const dateColumns = buildDateColumns();
-  const columnCount = 9 + Math.max(dateColumns.length - 1, 0);
+  const columnCount = 8 + Math.max(dateColumns.length - 1, 0);
   const rows = [
     ['', 'LOG BOOK SOUVENIR'],
     [],
-    ['', 'No', 'Nama Barang', 'Keterangan', 'Awal Stock', 'Barang Masuk', 'Barang Keluar', ...dateColumns.slice(1), 'Sisa Stock', 'PIC'],
-    ['', '', '', '', '', '', ...dateColumns, '', ''],
+    ['', 'No', 'Nama Barang', 'Keterangan', 'Awal Stock', 'Barang Masuk', 'Barang Keluar', ...dateColumns.slice(1), 'Sisa Stock'],
+    ['', '', '', '', '', '', ...dateColumns, ''],
     ...itemRows,
   ];
 
@@ -127,7 +127,6 @@ function buildLogbookRows() {
       description: item.description || '',
       incoming: 0,
       outgoingByDate: Object.fromEntries(dateKeys.map((date) => [date, 0])),
-      pic: new Set(),
     });
   });
 
@@ -141,13 +140,11 @@ function buildLogbookRows() {
         description: row.items?.description || row.description || '',
         incoming: 0,
         outgoingByDate: Object.fromEntries(dateKeys.map((date) => [date, 0])),
-        pic: new Set(),
       });
     }
     const item = grouped.get(key);
     if (!item.initialStock && row.items?.initial_stock) item.initialStock = Number(row.items.initial_stock || 0);
     if (!item.description && row.description) item.description = row.description;
-    if (row.pic) item.pic.add(row.pic);
     if (row.transaction_type === 'IN' && !isInitialStockTransaction(row)) item.incoming += Number(row.quantity || 0);
     if (row.transaction_type === 'OUT' && row.transaction_date) {
       item.outgoingByDate[row.transaction_date] = (item.outgoingByDate[row.transaction_date] || 0) + Number(row.quantity || 0);
@@ -169,7 +166,6 @@ function buildLogbookRows() {
       item.incoming || '',
       ...outgoingValues,
       item.currentStock || calculatedStock,
-      [...item.pic].join(', '),
     ];
   });
 }
@@ -196,7 +192,7 @@ function excelCell(value) {
 }
 
 function excelWorkbook(rows, columnCount, itemDatabaseRows) {
-  const columns = [32, 48, 240, 150, 80, 90, 90, ...Array(Math.max(columnCount - 9, 0)).fill(86), 90, 140];
+  const columns = [32, 48, 240, 150, 80, 90, 90, ...Array(Math.max(columnCount - 8, 0)).fill(86), 90];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
@@ -260,11 +256,11 @@ async function generate() {
     document.getElementById('reportTitle').textContent = `Laporan Stok Souvenir - ${periodLabels[period]}`;
     document.getElementById('reportMeta').textContent = `Periode: ${formatPeriod(period, value)}`;
     document.getElementById('printedAt').textContent = `Diperbarui: ${formatDate(new Date().toISOString())}`;
-    document.getElementById('rows').innerHTML = currentRows.length ? currentRows.map(reportRow).join('') : '<tr><td colspan="7" class="empty-state">Tidak ada data pada periode ini. Coba pilih periode Bulanan/Tahunan jika transaksi memakai tanggal berbeda.</td></tr>';
+    document.getElementById('rows').innerHTML = currentRows.length ? currentRows.map(reportRow).join('') : '<tr><td colspan="6" class="empty-state">Tidak ada data pada periode ini. Coba pilih periode Bulanan/Tahunan jika transaksi memakai tanggal berbeda.</td></tr>';
     document.getElementById('itemDatabaseTotal').textContent = `${formatNumber(currentItems.length)} barang aktif`;
     document.getElementById('itemDatabaseRows').innerHTML = currentItems.length ? currentItems.map(itemDatabaseRow).join('') : '<tr><td colspan="8" class="empty-state">Belum ada data barang.</td></tr>';
   } catch (error) {
-    document.getElementById('rows').innerHTML = `<tr><td colspan="7" class="empty-state text-danger">${escapeHtml(error.message || 'Gagal memuat laporan.')}</td></tr>`;
+    document.getElementById('rows').innerHTML = `<tr><td colspan="6" class="empty-state text-danger">${escapeHtml(error.message || 'Gagal memuat laporan.')}</td></tr>`;
     document.getElementById('itemDatabaseRows').innerHTML = `<tr><td colspan="8" class="empty-state text-danger">${escapeHtml(error.message || 'Gagal memuat database barang.')}</td></tr>`;
   }
 }
@@ -274,7 +270,7 @@ function metric(label, value) {
 }
 
 function reportRow(row) {
-  return `<tr><td>${formatDate(row.transaction_date)}</td><td>${escapeHtml(row.items?.item_code || '-')}</td><td>${escapeHtml(row.items?.item_name || '-')}</td><td><span class="badge ${row.transaction_type === 'IN' ? 'badge-in' : 'badge-out'}">${row.transaction_type === 'IN' ? 'Masuk' : 'Keluar'}</span></td><td class="text-end">${formatNumber(row.quantity)}</td><td>${escapeHtml(row.pic || '-')}</td><td>${escapeHtml(row.description || '-')}</td></tr>`;
+  return `<tr><td>${formatDate(row.transaction_date)}</td><td>${escapeHtml(row.items?.item_code || '-')}</td><td>${escapeHtml(row.items?.item_name || '-')}</td><td><span class="badge ${row.transaction_type === 'IN' ? 'badge-in' : 'badge-out'}">${row.transaction_type === 'IN' ? 'Masuk' : 'Keluar'}</span></td><td class="text-end">${formatNumber(row.quantity)}</td><td>${escapeHtml(row.description || '-')}</td></tr>`;
 }
 
 function itemDatabaseRow(item) {
