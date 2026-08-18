@@ -7,6 +7,8 @@ import { formatNumber } from '../utils/format.js?v=data-sync-20260818';
 let monthlyChart;
 let topItemsChart;
 
+const isMobileView = () => window.matchMedia('(max-width: 575.98px)').matches;
+
 const user = await requireAuth();
 if (user) {
   document.body.innerHTML = appShell('Dasbor', `
@@ -58,8 +60,6 @@ if (user) {
   await loadDashboard();
   bindDashboardRefresh();
 }
-
-const isMobileView = () => window.matchMedia('(max-width: 575.98px)').matches;
 
 async function loadDashboard() {
   try {
@@ -140,7 +140,7 @@ function renderMonthlyChart(rows) {
       labels,
       datasets: [
         { label: 'Barang Masuk', data: labels.map((d) => days[d].in), backgroundColor: 'rgba(220, 38, 38, .88)', borderColor: '#dc2626', borderWidth: 1, borderRadius: 6, maxBarThickness: mobile ? 28 : 42, categoryPercentage: mobile ? .48 : .56, barPercentage: mobile ? .62 : .72 },
-        { label: 'Barang Keluar', data: labels.map((d) => days[d].out), backgroundColor: 'rgba(237, 28, 36, .82)', borderColor: '#ED1C24', borderWidth: 1, borderRadius: 6, maxBarThickness: mobile ? 28 : 42, categoryPercentage: mobile ? .48 : .56, barPercentage: mobile ? .62 : .72 },
+        { label: 'Barang Keluar', data: labels.map((d) => days[d].out), backgroundColor: 'rgba(75, 85, 99, .86)', borderColor: '#4b5563', borderWidth: 1, borderRadius: 6, maxBarThickness: mobile ? 28 : 42, categoryPercentage: mobile ? .48 : .56, barPercentage: mobile ? .62 : .72 },
       ],
     },
     options: {

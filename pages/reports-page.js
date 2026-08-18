@@ -5,7 +5,7 @@ import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatDate, formatNumber, toISODate } from '../utils/format.js?v=data-sync-20260818';
 
 let currentRows = [];
-let currentReport = { period: 'daily', value: '' };
+let currentReport = { period: 'monthly', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
 const REPORT_UI_VERSION = 'report-ready-excel-20260812';
@@ -14,7 +14,7 @@ console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 const user = await requireAuth();
 if (user) {
   document.body.innerHTML = appShell('Laporan', `
-    <div class="panel mb-3 no-print"><form id="reportForm" class="row g-2 align-items-end"><div class="col-md-3"><label class="form-label">Periode</label><select class="form-select" name="period" id="periodSelect"><option value="daily">Harian</option><option value="monthly" selected>Bulanan</option><option value="yearly">Tahunan</option></select></div><div class="col-md-3"><label class="form-label">Nilai Periode</label><input class="form-control" id="periodValue" name="value" type="month" required></div><div class="col-md-6 d-flex gap-2 flex-wrap"><button class="btn btn-primary btn-icon" type="submit"><i class="bi bi-funnel"></i>Tampilkan</button><button class="btn btn-outline-secondary btn-icon" type="button" id="resetFilterButton"><i class="bi bi-arrow-counterclockwise"></i>Reset Filter</button><button class="btn btn-outline-danger btn-icon" type="button" id="excelButton"><i class="bi bi-file-earmark-excel"></i>Unduh Excel</button></div></form></div>
+    <div class="panel mb-3 no-print"><form id="reportForm" class="row g-2 align-items-end" autocomplete="off"><div class="col-md-3"><label class="form-label">Periode</label><select class="form-select" name="period" id="periodSelect" autocomplete="off"><option value="daily">Harian</option><option value="monthly" selected>Bulanan</option><option value="yearly">Tahunan</option></select></div><div class="col-md-3"><label class="form-label">Nilai Periode</label><input class="form-control" id="periodValue" name="value" type="month" autocomplete="off" required></div><div class="col-md-6 d-flex gap-2 flex-wrap"><button class="btn btn-primary btn-icon" type="submit"><i class="bi bi-funnel"></i>Tampilkan</button><button class="btn btn-outline-secondary btn-icon" type="button" id="resetFilterButton"><i class="bi bi-arrow-counterclockwise"></i>Reset Filter</button><button class="btn btn-outline-danger btn-icon" type="button" id="excelButton"><i class="bi bi-file-earmark-excel"></i>Unduh Excel</button></div></form></div>
     <article class="report-document" id="reportDocument">
       <header class="report-header">
         <div class="report-brand-block">
@@ -41,7 +41,7 @@ if (user) {
     </article>`);
   renderLayout(user, 'Laporan');
   bindEvents();
-  setCurrentMonth(document.getElementById('periodValue'));
+  setReportToCurrentMonth();
   await generate();
   bindReportRefresh();
 }
@@ -60,6 +60,7 @@ function resetFilters() {
   periodValue.type = 'month';
   periodValue.placeholder = '';
   setCurrentMonth(periodValue);
+  periodSelect.dispatchEvent(new Event('change', { bubbles: true }));
   generate();
 }
 
@@ -257,6 +258,16 @@ function bindReportRefresh() {
 
 function setCurrentMonth(input) {
   if (input) input.value = toISODate(new Date()).slice(0, 7);
+}
+
+function setReportToCurrentMonth() {
+  const periodSelect = document.getElementById('periodSelect');
+  const periodValue = document.getElementById('periodValue');
+  periodSelect.value = 'monthly';
+  periodValue.type = 'month';
+  periodValue.placeholder = '';
+  setCurrentMonth(periodValue);
+  periodSelect.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 
