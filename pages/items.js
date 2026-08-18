@@ -10,7 +10,7 @@ import {
   countItemTransactions,
   listItemTransactions,
   getNextItemCode,
-} from '../services/items.js?v=data-sync-20260818';
+} from '../services/items.js?v=item-actions-report-20260818';
 import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=data-sync-20260818';
 
 let items = [];

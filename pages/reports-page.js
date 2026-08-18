@@ -1,6 +1,6 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
-import { reportTransactions } from '../services/transactions.js?v=data-sync-20260818';
+import { reportTransactions } from '../services/transactions.js?v=item-actions-report-20260818';
 import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatDate, formatNumber, toISODate } from '../utils/format.js?v=data-sync-20260818';
 
@@ -116,7 +116,7 @@ function buildLogbookRows() {
       grouped.set(key, {
         name: row.items?.item_name || '-',
         initialStock: Number(row.items?.initial_stock || 0),
-        description: row.description || '',
+        description: row.items?.description || row.description || '',
         incoming: 0,
         outgoingByDate: Object.fromEntries(dateKeys.map((date) => [date, 0])),
         pic: new Set(),
@@ -126,7 +126,7 @@ function buildLogbookRows() {
     if (!item.initialStock && row.items?.initial_stock) item.initialStock = Number(row.items.initial_stock || 0);
     if (!item.description && row.description) item.description = row.description;
     if (row.pic) item.pic.add(row.pic);
-    if (row.transaction_type === 'IN') item.incoming += Number(row.quantity || 0);
+    if (row.transaction_type === 'IN' && !isInitialStockTransaction(row)) item.incoming += Number(row.quantity || 0);
     if (row.transaction_type === 'OUT' && row.transaction_date) {
       item.outgoingByDate[row.transaction_date] = (item.outgoingByDate[row.transaction_date] || 0) + Number(row.quantity || 0);
     }
@@ -225,6 +225,10 @@ function metric(label, value) {
 
 function reportRow(row) {
   return `<tr><td>${formatDate(row.transaction_date)}</td><td>${escapeHtml(row.items?.item_code || '-')}</td><td>${escapeHtml(row.items?.item_name || '-')}</td><td><span class="badge ${row.transaction_type === 'IN' ? 'badge-in' : 'badge-out'}">${row.transaction_type === 'IN' ? 'Masuk' : 'Keluar'}</span></td><td class="text-end">${formatNumber(row.quantity)}</td><td>${escapeHtml(row.pic || '-')}</td><td>${escapeHtml(row.description || '-')}</td></tr>`;
+}
+
+function isInitialStockTransaction(row) {
+  return String(row.description || '').toLowerCase().startsWith('stok awal dari menu barang');
 }
 
 function formatPeriod(period, value) {
