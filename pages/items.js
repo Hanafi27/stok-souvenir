@@ -10,8 +10,8 @@ import {
   countItemTransactions,
   listItemTransactions,
   getNextItemCode,
-} from '../services/items.js?v=stock-edit-20260814';
-import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=stock-edit-20260814';
+} from '../services/items.js?v=data-sync-20260818';
+import { formatDate, formatNumber, showAlert, clearAlert } from '../utils/format.js?v=data-sync-20260818';
 
 let items = [];
 let editingId = null;
@@ -205,6 +205,7 @@ async function saveItem(event) {
   try {
     if (editingId) await updateItem(editingId, payload);
     else await createItem(payload);
+    notifyInventoryChanged();
     bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide();
     await loadItems(document.getElementById('searchInput').value);
   } catch (error) {
@@ -222,6 +223,7 @@ async function removeItem(item) {
   try {
     if (transactionCount > 0) await deactivateItem(item.id);
     else await deleteItem(item.id);
+    notifyInventoryChanged();
     selectedItemIds.delete(item.id);
     await loadItems(document.getElementById('searchInput').value);
     showAlert(
@@ -258,6 +260,7 @@ async function removeSelectedItems() {
         await deleteItem(item.id);
         deleted += 1;
       }
+      notifyInventoryChanged();
       selectedItemIds.delete(item.id);
     } catch (error) {
       failed.push(`${item.item_code} - ${item.item_name}: ${error.message}`);
@@ -277,6 +280,10 @@ async function removeSelectedItems() {
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+}
+
+function notifyInventoryChanged() {
+  localStorage.setItem('inventory_sync_at', String(Date.now()));
 }
 
 

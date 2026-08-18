@@ -1,6 +1,14 @@
-﻿export function formatDate(value) {
+export function formatDate(value) {
   if (!value) return '-';
-  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(value));
+  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(parseDate(value));
+}
+
+function parseDate(value) {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(value);
 }
 
 export function formatNumber(value) {
@@ -15,7 +23,10 @@ export function currentMonthRange() {
 }
 
 export function toISODate(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function getQueryParam(name) {
@@ -54,3 +65,4 @@ export function showAlert(container, message, type = 'danger') {
 export function clearAlert(container) {
   if (container) container.innerHTML = '';
 }
+

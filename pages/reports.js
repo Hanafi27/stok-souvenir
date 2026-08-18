@@ -1,7 +1,8 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
-import { reportTransactions } from '../services/transactions.js';
-import { formatDate, formatNumber, setToday } from '../utils/format.js';
+import { reportTransactions } from '../services/transactions.js?v=data-sync-20260818';
+import { supabase } from '../services/supabase.js?v=data-sync-20260818';
+import { formatDate, formatNumber, setToday } from '../utils/format.js?v=data-sync-20260818';
 
 let currentRows = [];
 let currentReport = { period: 'daily', value: '' };
@@ -42,6 +43,7 @@ if (user) {
   bindEvents();
   setToday(document.getElementById('periodValue'));
   await generate();
+  bindReportRefresh();
 }
 
 function bindEvents() {
@@ -196,18 +198,22 @@ function changeInputType() {
 }
 
 async function generate() {
-  const form = document.getElementById('reportForm');
-  const { period, value } = Object.fromEntries(new FormData(form).entries());
-  currentReport = { period, value };
-  currentRows = await reportTransactions(period, value);
-  const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
-  const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
+  try {
+    const form = document.getElementById('reportForm');
+    const { period, value } = Object.fromEntries(new FormData(form).entries());
+    currentReport = { period, value };
+    currentRows = await reportTransactions(period, value);
+    const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
+    const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
 
-  document.getElementById('summary').innerHTML = metric('Total Transaksi', currentRows.length) + metric('Total Barang Masuk', incoming) + metric('Total Barang Keluar', outgoing);
-  document.getElementById('reportTitle').textContent = `Laporan Stok Souvenir - ${periodLabels[period]}`;
-  document.getElementById('reportMeta').textContent = `Periode: ${formatPeriod(period, value)}`;
-  document.getElementById('printedAt').textContent = `Dibuat: ${formatDate(new Date().toISOString())}`;
-  document.getElementById('rows').innerHTML = currentRows.length ? currentRows.map(reportRow).join('') : '<tr><td colspan="7" class="empty-state">Tidak ada data laporan.</td></tr>';
+    document.getElementById('summary').innerHTML = metric('Total Transaksi', currentRows.length) + metric('Total Barang Masuk', incoming) + metric('Total Barang Keluar', outgoing);
+    document.getElementById('reportTitle').textContent = `Laporan Stok Souvenir - ${periodLabels[period]}`;
+    document.getElementById('reportMeta').textContent = `Periode: ${formatPeriod(period, value)}`;
+    document.getElementById('printedAt').textContent = `Diperbarui: ${formatDate(new Date().toISOString())}`;
+    document.getElementById('rows').innerHTML = currentRows.length ? currentRows.map(reportRow).join('') : '<tr><td colspan="7" class="empty-state">Tidak ada data pada periode ini. Coba pilih periode Bulanan/Tahunan jika transaksi memakai tanggal berbeda.</td></tr>';
+  } catch (error) {
+    document.getElementById('rows').innerHTML = `<tr><td colspan="7" class="empty-state text-danger">${escapeHtml(error.message || 'Gagal memuat laporan.')}</td></tr>`;
+  }
 }
 
 function metric(label, value) {
@@ -230,6 +236,21 @@ function formatPeriod(period, value) {
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+}
+
+function bindReportRefresh() {
+  window.addEventListener('focus', generate);
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'inventory_sync_at') generate();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) generate();
+  });
+  setInterval(generate, 15000);
+  supabase?.channel('report-transaction-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, generate)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, generate)
+    .subscribe();
 }
 
 

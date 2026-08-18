@@ -1,8 +1,8 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
-import { getActiveItems } from '../services/items.js';
-import { createTransaction } from '../services/transactions.js';
-import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=stock-edit-20260814';
+import { getActiveItems } from '../services/items.js?v=data-sync-20260818';
+import { createTransaction } from '../services/transactions.js?v=data-sync-20260818';
+import { setToday, showAlert, clearAlert, formatNumber } from '../utils/format.js?v=data-sync-20260818';
 
 const type = document.body.dataset.transactionType || 'IN';
 const isOut = type === 'OUT';
@@ -161,6 +161,7 @@ async function saveTransaction(event) {
   }
   try {
     await createTransaction(payload);
+    notifyInventoryChanged();
     showAlert(document.getElementById('alertBox'), 'Transaksi berhasil disimpan.', 'info');
     form.reset();
     setToday(form.transaction_date);
@@ -173,6 +174,10 @@ async function saveTransaction(event) {
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+}
+
+function notifyInventoryChanged() {
+  localStorage.setItem('inventory_sync_at', String(Date.now()));
 }
 
 

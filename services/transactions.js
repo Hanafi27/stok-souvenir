@@ -1,5 +1,5 @@
 ﻿import { supabase, ensureSupabaseConfigured, getCurrentUser } from './supabase.js';
-import { currentMonthRange } from '../utils/format.js';
+import { currentMonthRange } from '../utils/format.js?v=data-sync-20260818';
 
 export async function createTransaction(payload) {
   ensureSupabaseConfigured();
@@ -59,7 +59,7 @@ export async function dashboardStats() {
   const { start, end } = currentMonthRange();
   const [{ data: items, error: itemError }, { data: tx, error: txError }] = await Promise.all([
     supabase.from('items').select('*').eq('is_active', true),
-    supabase.from('transactions').select('*, items(item_name)').gte('transaction_date', start).lte('transaction_date', end),
+    supabase.from('transactions').select('*, items(item_name, is_active, current_stock)').gte('transaction_date', start).lte('transaction_date', end),
   ]);
   if (itemError) throw itemError;
   if (txError) throw txError;

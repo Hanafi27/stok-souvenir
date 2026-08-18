@@ -1,7 +1,11 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
-import { dashboardStats } from '../services/transactions.js';
-import { formatNumber } from '../utils/format.js';
+import { dashboardStats } from '../services/transactions.js?v=data-sync-20260818';
+import { supabase } from '../services/supabase.js?v=data-sync-20260818';
+import { formatNumber } from '../utils/format.js?v=data-sync-20260818';
+
+let monthlyChart;
+let topItemsChart;
 
 const user = await requireAuth();
 if (user) {
@@ -51,7 +55,8 @@ if (user) {
       </div>
     </div>`);
   renderLayout(user, 'Dasbor');
-  loadDashboard();
+  await loadDashboard();
+  bindDashboardRefresh();
 }
 
 const isMobileView = () => window.matchMedia('(max-width: 575.98px)').matches;
@@ -128,7 +133,8 @@ function renderMonthlyChart(rows) {
     if (row.transaction_type === 'OUT') days[key].out += Number(row.quantity);
   });
   const labels = Object.keys(days).sort();
-  new Chart(document.getElementById('monthlyChart'), {
+  monthlyChart?.destroy();
+  monthlyChart = new Chart(document.getElementById('monthlyChart'), {
     type: 'bar',
     data: {
       labels,
@@ -155,16 +161,32 @@ function renderMonthlyChart(rows) {
 function renderTopItemsChart(rows) {
   const mobile = isMobileView();
   const totals = {};
-  rows.filter((row) => row.transaction_type === 'OUT').forEach((row) => {
+  rows.filter((row) => row.transaction_type === 'OUT' && row.items?.is_active !== false && Number(row.items?.current_stock ?? 1) > 0).forEach((row) => {
     const name = row.items?.item_name || 'Tidak diketahui';
     totals[name] = (totals[name] || 0) + Number(row.quantity);
   });
   const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  new Chart(document.getElementById('topItemsChart'), {
+  topItemsChart?.destroy();
+  topItemsChart = new Chart(document.getElementById('topItemsChart'), {
     type: 'doughnut',
     data: { labels: entries.map(([name]) => name), datasets: [{ data: entries.map(([, qty]) => qty), backgroundColor: ['#dc2626', '#ED1C24', '#fecaca', '#f47b80', '#7f1d1d', '#b91218', '#fca5a5', '#d94b51', '#4b5563', '#fee2e2'], borderWidth: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: mobile ? '62%' : '68%', plugins: { legend: { position: 'bottom', align: 'center', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 9, boxHeight: 9, padding: mobile ? 12 : 28, font: { size: mobile ? 11 : 13 }, color: '#4b5563' } } } },
   });
+}
+
+function bindDashboardRefresh() {
+  window.addEventListener('focus', loadDashboard);
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'inventory_sync_at') loadDashboard();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) loadDashboard();
+  });
+  setInterval(loadDashboard, 15000);
+  supabase?.channel('dashboard-inventory-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, loadDashboard)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, loadDashboard)
+    .subscribe();
 }
 
 
