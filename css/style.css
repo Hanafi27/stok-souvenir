@@ -2502,6 +2502,38 @@ a:hover,
   max-width: 100% !important;
 }
 
+.chart-empty-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  color: #7f1d1d;
+  background: #fffafa;
+  border: 1px dashed #fecaca;
+  border-radius: 8px;
+}
+
+.chart-empty-state i {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 1.35rem;
+}
+
+.chart-empty-state span {
+  max-width: 260px;
+  color: #6b7280;
+  font-size: .86rem;
+}
+
 @media (max-width: 991.98px) {
   .dashboard-grid {
     grid-template-columns: minmax(0, 1fr) !important;

@@ -161,12 +161,22 @@ function renderMonthlyChart(rows) {
 function renderTopItemsChart(rows) {
   const mobile = isMobileView();
   const totals = {};
-  rows.filter((row) => row.transaction_type === 'OUT' && row.items?.is_active !== false && Number(row.items?.current_stock ?? 1) > 0).forEach((row) => {
+  rows.filter((row) => row.transaction_type === 'OUT' && row.items?.is_active !== false).forEach((row) => {
     const name = row.items?.item_name || 'Tidak diketahui';
     totals[name] = (totals[name] || 0) + Number(row.quantity);
   });
   const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const canvas = document.getElementById('topItemsChart');
+  const wrap = canvas.parentElement;
+  wrap.querySelector('.chart-empty-state')?.remove();
   topItemsChart?.destroy();
+  if (!entries.length) {
+    canvas.hidden = true;
+    wrap.insertAdjacentHTML('beforeend', '<div class="chart-empty-state"><i class="bi bi-pie-chart"></i><strong>Belum ada data barang keluar</strong><span>Diagram akan muncul otomatis setelah ada transaksi keluar pada bulan ini.</span></div>');
+    topItemsChart = null;
+    return;
+  }
+  canvas.hidden = false;
   topItemsChart = new Chart(document.getElementById('topItemsChart'), {
     type: 'doughnut',
     data: { labels: entries.map(([name]) => name), datasets: [{ data: entries.map(([, qty]) => qty), backgroundColor: ['#dc2626', '#ED1C24', '#fecaca', '#f47b80', '#7f1d1d', '#b91218', '#fca5a5', '#d94b51', '#4b5563', '#fee2e2'], borderWidth: 0 }] },
