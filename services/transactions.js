@@ -8,9 +8,11 @@ function maxDate(a, b) {
 }
 
 function isItemMenuStockMovement(row) {
-  const description = String(row.description || '').toLowerCase();
-  return row.pic === 'Menu Barang'
-    || description.startsWith('stok awal dari menu barang')
+  const pic = String(row.pic || '').trim().toLowerCase();
+  const description = String(row.description || '').trim().toLowerCase();
+  return pic === 'menu barang'
+    || description.includes('dari menu barang')
+    || description.startsWith('stok awal')
     || description.startsWith('koreksi stok');
 }
 

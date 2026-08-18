@@ -1,7 +1,7 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=operational-report-20260818';
-import { reportTransactions } from '../services/transactions.js?v=operational-report-20260818';
-import { listItems } from '../services/items.js?v=operational-report-20260818';
+import { reportTransactions } from '../services/transactions.js?v=clean-item-setup-report-20260818';
+import { listItems } from '../services/items.js?v=clean-item-setup-report-20260818';
 import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatDate, formatNumber, toISODate } from '../utils/format.js?v=data-sync-20260818';
 
@@ -10,7 +10,7 @@ let currentItems = [];
 let currentReport = { period: 'monthly', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'operational-report-20260818';
+const REPORT_UI_VERSION = 'clean-item-setup-report-20260818';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -249,6 +249,7 @@ async function generate() {
       reportTransactions(period, value),
       listItems(),
     ]);
+    currentItems = sortNewestItems(currentItems);
     const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
     const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
 
@@ -275,6 +276,14 @@ function reportRow(row) {
 
 function itemDatabaseRow(item) {
   return `<tr><td>${escapeHtml(item.item_code || '-')}</td><td>${escapeHtml(item.item_name || '-')}</td><td>${escapeHtml(item.description || '-')}</td><td class="text-end">${formatNumber(item.initial_stock || 0)}</td><td class="text-end">${formatNumber(item.current_stock || 0)}</td><td class="text-end">${formatNumber(item.minimum_stock || 0)}</td><td><span class="badge ${item.is_active === false ? 'badge-out' : 'badge-in'}">${item.is_active === false ? 'Nonaktif' : 'Aktif'}</span></td><td>${item.created_at ? formatDate(item.created_at) : '-'}</td></tr>`;
+}
+
+function sortNewestItems(items) {
+  return [...items].sort((a, b) => {
+    const createdDiff = new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (createdDiff) return createdDiff;
+    return String(b.item_code || '').localeCompare(String(a.item_code || ''));
+  });
 }
 
 function isInitialStockTransaction(row) {
