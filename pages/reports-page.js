@@ -1,7 +1,7 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
 import { reportTransactions } from '../services/transactions.js?v=report-items-visible-20260818';
-import { getActiveItems } from '../services/items.js?v=report-items-visible-20260818';
+import { listItems } from '../services/items.js?v=report-items-list-20260818';
 import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatDate, formatNumber, toISODate } from '../utils/format.js?v=data-sync-20260818';
 
@@ -29,19 +29,19 @@ if (user) {
         </div>
       </header>
       <section class="report-summary" id="summary"></section>
-      <section class="report-table-card">
+      <section class="report-table-card mt-3">
+        <div class="report-table-title">
+          <h3>Daftar Barang</h3>
+          <span id="itemDatabaseTotal"></span>
+        </div>
+        <div class="table-responsive"><table class="table align-middle report-table item-database-table"><thead><tr><th>Kode Barang</th><th>Nama Barang</th><th>Keterangan</th><th class="text-end">Stok Awal</th><th class="text-end">Stok Saat Ini</th><th class="text-end">Stok Minimum</th><th>Status</th><th>Dibuat</th></tr></thead><tbody id="itemDatabaseRows"></tbody></table></div>
+      </section>
+      <section class="report-table-card mt-3">
         <div class="report-table-title">
           <h3>Rincian Transaksi</h3>
           <span id="printedAt"></span>
         </div>
         <div class="table-responsive"><table class="table align-middle report-table"><thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th class="text-end">Jumlah</th><th>PIC</th><th>Keterangan</th></tr></thead><tbody id="rows"></tbody></table></div>
-      </section>
-      <section class="report-table-card mt-3">
-        <div class="report-table-title">
-          <h3>Database Barang</h3>
-          <span id="itemDatabaseTotal"></span>
-        </div>
-        <div class="table-responsive"><table class="table align-middle report-table item-database-table"><thead><tr><th>Kode Barang</th><th>Nama Barang</th><th>Keterangan</th><th class="text-end">Stok Awal</th><th class="text-end">Stok Saat Ini</th><th class="text-end">Stok Minimum</th><th>Status</th><th>Dibuat</th></tr></thead><tbody id="itemDatabaseRows"></tbody></table></div>
       </section>
       <footer class="report-footer print-only">
         <span>Dokumen ini dihasilkan dari Sistem Stok Souvenir.</span>
@@ -251,12 +251,12 @@ async function generate() {
     currentReport = { period, value };
     [currentRows, currentItems] = await Promise.all([
       reportTransactions(period, value),
-      getActiveItems(),
+      listItems(),
     ]);
     const incoming = currentRows.filter((row) => row.transaction_type === 'IN').reduce((sum, row) => sum + Number(row.quantity), 0);
     const outgoing = currentRows.filter((row) => row.transaction_type === 'OUT').reduce((sum, row) => sum + Number(row.quantity), 0);
 
-    document.getElementById('summary').innerHTML = metric('Total Transaksi', currentRows.length) + metric('Total Barang Masuk', incoming) + metric('Total Barang Keluar', outgoing);
+    document.getElementById('summary').innerHTML = metric('Total Barang', currentItems.length) + metric('Total Transaksi', currentRows.length) + metric('Total Barang Masuk', incoming) + metric('Total Barang Keluar', outgoing);
     document.getElementById('reportTitle').textContent = `Laporan Stok Souvenir - ${periodLabels[period]}`;
     document.getElementById('reportMeta').textContent = `Periode: ${formatPeriod(period, value)}`;
     document.getElementById('printedAt').textContent = `Diperbarui: ${formatDate(new Date().toISOString())}`;
