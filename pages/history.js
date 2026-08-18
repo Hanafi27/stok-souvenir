@@ -1,7 +1,7 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
 import { getActiveItems } from '../services/items.js?v=data-sync-20260818';
-import { listTransactions } from '../services/transactions.js?v=data-sync-20260818';
+import { listTransactions } from '../services/transactions.js?v=report-items-visible-20260818';
 import { formatDate, formatNumber } from '../utils/format.js?v=data-sync-20260818';
 
 let items = [];

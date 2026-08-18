@@ -1,7 +1,7 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
-import { reportTransactions } from '../services/transactions.js?v=item-actions-report-20260818';
-import { getActiveItems } from '../services/items.js?v=excel-items-backup-20260818';
+import { reportTransactions } from '../services/transactions.js?v=report-items-visible-20260818';
+import { getActiveItems } from '../services/items.js?v=report-items-visible-20260818';
 import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatDate, formatNumber, toISODate } from '../utils/format.js?v=data-sync-20260818';
 
@@ -10,7 +10,7 @@ let currentItems = [];
 let currentReport = { period: 'monthly', value: '' };
 
 const periodLabels = { daily: 'Harian', monthly: 'Bulanan', yearly: 'Tahunan' };
-const REPORT_UI_VERSION = 'report-ready-excel-20260812';
+const REPORT_UI_VERSION = 'report-items-visible-20260818';
 console.info('REPORT_UI_VERSION', REPORT_UI_VERSION);
 
 const user = await requireAuth();
@@ -35,6 +35,13 @@ if (user) {
           <span id="printedAt"></span>
         </div>
         <div class="table-responsive"><table class="table align-middle report-table"><thead><tr><th>Tanggal</th><th>Kode Barang</th><th>Barang</th><th>Jenis</th><th class="text-end">Jumlah</th><th>PIC</th><th>Keterangan</th></tr></thead><tbody id="rows"></tbody></table></div>
+      </section>
+      <section class="report-table-card mt-3">
+        <div class="report-table-title">
+          <h3>Database Barang</h3>
+          <span id="itemDatabaseTotal"></span>
+        </div>
+        <div class="table-responsive"><table class="table align-middle report-table item-database-table"><thead><tr><th>Kode Barang</th><th>Nama Barang</th><th>Keterangan</th><th class="text-end">Stok Awal</th><th class="text-end">Stok Saat Ini</th><th class="text-end">Stok Minimum</th><th>Status</th><th>Dibuat</th></tr></thead><tbody id="itemDatabaseRows"></tbody></table></div>
       </section>
       <footer class="report-footer print-only">
         <span>Dokumen ini dihasilkan dari Sistem Stok Souvenir.</span>
@@ -254,8 +261,11 @@ async function generate() {
     document.getElementById('reportMeta').textContent = `Periode: ${formatPeriod(period, value)}`;
     document.getElementById('printedAt').textContent = `Diperbarui: ${formatDate(new Date().toISOString())}`;
     document.getElementById('rows').innerHTML = currentRows.length ? currentRows.map(reportRow).join('') : '<tr><td colspan="7" class="empty-state">Tidak ada data pada periode ini. Coba pilih periode Bulanan/Tahunan jika transaksi memakai tanggal berbeda.</td></tr>';
+    document.getElementById('itemDatabaseTotal').textContent = `${formatNumber(currentItems.length)} barang aktif`;
+    document.getElementById('itemDatabaseRows').innerHTML = currentItems.length ? currentItems.map(itemDatabaseRow).join('') : '<tr><td colspan="8" class="empty-state">Belum ada data barang.</td></tr>';
   } catch (error) {
     document.getElementById('rows').innerHTML = `<tr><td colspan="7" class="empty-state text-danger">${escapeHtml(error.message || 'Gagal memuat laporan.')}</td></tr>`;
+    document.getElementById('itemDatabaseRows').innerHTML = `<tr><td colspan="8" class="empty-state text-danger">${escapeHtml(error.message || 'Gagal memuat database barang.')}</td></tr>`;
   }
 }
 
@@ -265,6 +275,10 @@ function metric(label, value) {
 
 function reportRow(row) {
   return `<tr><td>${formatDate(row.transaction_date)}</td><td>${escapeHtml(row.items?.item_code || '-')}</td><td>${escapeHtml(row.items?.item_name || '-')}</td><td><span class="badge ${row.transaction_type === 'IN' ? 'badge-in' : 'badge-out'}">${row.transaction_type === 'IN' ? 'Masuk' : 'Keluar'}</span></td><td class="text-end">${formatNumber(row.quantity)}</td><td>${escapeHtml(row.pic || '-')}</td><td>${escapeHtml(row.description || '-')}</td></tr>`;
+}
+
+function itemDatabaseRow(item) {
+  return `<tr><td>${escapeHtml(item.item_code || '-')}</td><td>${escapeHtml(item.item_name || '-')}</td><td>${escapeHtml(item.description || '-')}</td><td class="text-end">${formatNumber(item.initial_stock || 0)}</td><td class="text-end">${formatNumber(item.current_stock || 0)}</td><td class="text-end">${formatNumber(item.minimum_stock || 0)}</td><td><span class="badge ${item.is_active === false ? 'badge-out' : 'badge-in'}">${item.is_active === false ? 'Nonaktif' : 'Aktif'}</span></td><td>${item.created_at ? formatDate(item.created_at) : '-'}</td></tr>`;
 }
 
 function isInitialStockTransaction(row) {

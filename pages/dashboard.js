@@ -1,6 +1,6 @@
 import { requireAuth } from '../services/auth.js';
 import { renderLayout, appShell } from '../components/layout.js?v=sidebar-title-20260814';
-import { dashboardStats } from '../services/transactions.js?v=item-actions-report-20260818';
+import { dashboardStats } from '../services/transactions.js?v=report-items-visible-20260818';
 import { supabase } from '../services/supabase.js?v=data-sync-20260818';
 import { formatNumber } from '../utils/format.js?v=data-sync-20260818';
 

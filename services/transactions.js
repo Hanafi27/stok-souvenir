@@ -1,6 +1,12 @@
 ﻿import { supabase, ensureSupabaseConfigured, getCurrentUser } from './supabase.js';
 import { currentMonthRange } from '../utils/format.js?v=data-sync-20260818';
 
+const TRANSACTION_VISIBLE_FROM = '2026-08-18';
+
+function maxDate(a, b) {
+  return a > b ? a : b;
+}
+
 export async function createTransaction(payload) {
   ensureSupabaseConfigured();
   const user = await getCurrentUser();
@@ -23,6 +29,7 @@ export async function listTransactions(filters = {}) {
   let query = supabase
     .from('transactions')
     .select('*, items(item_code, item_name)')
+    .gte('transaction_date', TRANSACTION_VISIBLE_FROM)
     .order('transaction_date', { ascending: false })
     .order('created_at', { ascending: false });
 
@@ -32,7 +39,7 @@ export async function listTransactions(filters = {}) {
     const start = `${year}-${String(month).padStart(2, '0')}-01`;
     const endDate = new Date(year, month, 0).getDate();
     const end = `${year}-${String(month).padStart(2, '0')}-${String(endDate).padStart(2, '0')}`;
-    query = query.gte('transaction_date', start).lte('transaction_date', end);
+    query = query.gte('transaction_date', maxDate(start, TRANSACTION_VISIBLE_FROM)).lte('transaction_date', end);
   }
   if (filters.item_id) query = query.eq('item_id', filters.item_id);
   if (filters.transaction_type) query = query.eq('transaction_type', filters.transaction_type);
@@ -57,9 +64,10 @@ export async function deleteTransactions(ids = []) {
 export async function dashboardStats() {
   ensureSupabaseConfigured();
   const { start, end } = currentMonthRange();
+  const visibleStart = maxDate(start, TRANSACTION_VISIBLE_FROM);
   const [{ data: items, error: itemError }, { data: tx, error: txError }] = await Promise.all([
     supabase.from('items').select('*').eq('is_active', true),
-    supabase.from('transactions').select('*, items(item_name, is_active, current_stock)').gte('transaction_date', start).lte('transaction_date', end),
+    supabase.from('transactions').select('*, items(item_name, is_active, current_stock)').gte('transaction_date', visibleStart).lte('transaction_date', end),
   ]);
   if (itemError) throw itemError;
   if (txError) throw txError;
@@ -79,13 +87,19 @@ export async function dashboardStats() {
 
 export async function reportTransactions(period, value) {
   ensureSupabaseConfigured();
-  let query = supabase.from('transactions').select('*, items(item_code, item_name, description, initial_stock, current_stock)').order('transaction_date', { ascending: true });
+  let query = supabase
+    .from('transactions')
+    .select('*, items(item_code, item_name, description, initial_stock, current_stock)')
+    .gte('transaction_date', TRANSACTION_VISIBLE_FROM)
+    .order('transaction_date', { ascending: true });
   if (period === 'daily') query = query.eq('transaction_date', value);
   if (period === 'monthly') {
     const [year, month] = value.split('-').map(Number);
-    query = query.gte('transaction_date', `${year}-${String(month).padStart(2, '0')}-01`).lte('transaction_date', `${year}-${String(month).padStart(2, '0')}-${String(new Date(year, month, 0).getDate()).padStart(2, '0')}`);
+    const start = `${year}-${String(month).padStart(2, '0')}-01`;
+    const end = `${year}-${String(month).padStart(2, '0')}-${String(new Date(year, month, 0).getDate()).padStart(2, '0')}`;
+    query = query.gte('transaction_date', maxDate(start, TRANSACTION_VISIBLE_FROM)).lte('transaction_date', end);
   }
-  if (period === 'yearly') query = query.gte('transaction_date', `${value}-01-01`).lte('transaction_date', `${value}-12-31`);
+  if (period === 'yearly') query = query.gte('transaction_date', maxDate(`${value}-01-01`, TRANSACTION_VISIBLE_FROM)).lte('transaction_date', `${value}-12-31`);
   const { data, error } = await query;
   if (error) throw error;
   return data || [];
