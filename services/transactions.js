@@ -7,6 +7,13 @@ function maxDate(a, b) {
   return a > b ? a : b;
 }
 
+function isItemMenuStockMovement(row) {
+  const description = String(row.description || '').toLowerCase();
+  return row.pic === 'Menu Barang'
+    || description.startsWith('stok awal dari menu barang')
+    || description.startsWith('koreksi stok');
+}
+
 export async function createTransaction(payload) {
   ensureSupabaseConfigured();
   const user = await getCurrentUser();
@@ -73,7 +80,7 @@ export async function dashboardStats() {
   if (txError) throw txError;
 
   const allItems = items || [];
-  const monthTx = tx || [];
+  const monthTx = (tx || []).filter((row) => !isItemMenuStockMovement(row));
   return {
     totalItems: allItems.length,
     currentStock: allItems.reduce((sum, item) => sum + Number(item.current_stock || 0), 0),
@@ -102,7 +109,7 @@ export async function reportTransactions(period, value) {
   if (period === 'yearly') query = query.gte('transaction_date', maxDate(`${value}-01-01`, TRANSACTION_VISIBLE_FROM)).lte('transaction_date', `${value}-12-31`);
   const { data, error } = await query;
   if (error) throw error;
-  return data || [];
+  return (data || []).filter((row) => !isItemMenuStockMovement(row));
 }
 
 
